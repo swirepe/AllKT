@@ -9,6 +9,10 @@ import parallel.KTRunnerType;
 import parallel.MassRunner;
 
 public class KTCollection implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected ArrayList<KT> KTList = new ArrayList<KT>();
 	protected KT[] models;
 	

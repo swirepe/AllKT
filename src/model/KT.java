@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class KT implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected double initial;
 	protected double learn;
 	protected double guess;
@@ -13,7 +17,7 @@ public class KT implements Serializable{
 	protected double[] knowledgeCurve;
 	protected double[] performanceCurve;
 	
-	// responses -> pcorrect
+	// responses -> pcorrect on next attempt
 	protected HashMap<Response, Double> predictionMap;
 	
 	// responses -> pknowledge
@@ -57,7 +61,7 @@ public class KT implements Serializable{
 		for(Response r: rs){
 			forwardKnowledgeRecursive(r);
 			predict(r);
-			responseProbabilityRecursive(r);
+			responseProbability(r);
 		}
 		makeCurves();
 	} // end of method populateTables
@@ -254,7 +258,7 @@ public class KT implements Serializable{
 		// sensor:
 		// you know it and you failed to mess up + you didn't know it and you guesses
 		double pcorrect = (know * (1-this.slip)) + ((1-know)*this.guess);
-		// you didnt know it and you failed to guess + you knew it and you messed up
+		// you didn't know it and you failed to guess + you knew it and you messed up
 		double pincorrect = ((1-know)*(1-this.guess)) + (know * this.slip);
 		
 		// normalize
@@ -277,33 +281,62 @@ public class KT implements Serializable{
 	 * @param r
 	 * @return
 	 */
-	public double responseProbabilityRecursive(Response r){
+	public double responseProbability(Response r){
 		if(this.likelihoodMap.containsKey(r)){
 			return this.likelihoodMap.get(r);
 		}else{
 			double pResponse = 1;
 			
 			if(r.length() > 0){
-				pResponse = responseProbabilityRecursive(r.slice(r.length() -1));
-				pResponse = responseProbabilityStep(pResponse, r.last());
+				Response rslice;
+				
+				for(int i = 1; i < r.length(); i++){
+					rslice = r.slice(i);
+					
+					// memoize
+					if(this.likelihoodMap.containsKey(rslice)){
+						pResponse *= this.likelihoodMap.get(rslice);
+					}else{
+					
+						double pKnow = this.forwardKnowledge(rslice);
+						boolean obs = rslice.last();
+						
+						pResponse *= responseProbabilityStep(pKnow, obs);
+						
+						// store
+						this.likelihoodMap.put(rslice, pResponse);
+						
+					}
+				}
+				
+
+						
+				// store
+				if(! this.likelihoodMap.containsKey(r)){
+					this.likelihoodMap.put(r, pResponse);
+				}
+				
 			}
-			
-			
-			
 			return pResponse;
 		}
 	} // end of method responseProbability
 	
 	
+
+	
 	public double responseProbabilityStep(double pKnow, boolean ob){
+		double pResponse = 0;
 		if(ob == false){
-			// TODO implement
 			// you got it wrong:
 			//   probability you knew it and slipped + probability you didn't know it and failed to guess
-		}else if(ob == true){
+			pResponse = (pKnow * this.slip) + ((1-pKnow) * (1-this.guess));
 			
+		}else if(ob == true){
+			// you got it right:
+			// probability that you knew it and failed to slip + probability you didn't and guessed
+			pResponse = (pKnow * (1-this.slip)) + ((1-pKnow) * this.guess);
 		}
-		return pKnow;  
+		return pResponse;  
 	} // end of method responseProbabilityStep
 	
 	
