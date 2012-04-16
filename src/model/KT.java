@@ -37,6 +37,11 @@ public class KT implements Serializable{
 		this.guess = guess;
 		this.slip = slip;
 		
+		
+		this.predictionMap = new HashMap<Response, Double>();
+		this.knowledgeMap = new HashMap<Response, Double>();
+		this.likelihoodMap = new HashMap<Response, Double>();
+
 		validateParameters();
 	} // end of constructor
 	
@@ -54,10 +59,6 @@ public class KT implements Serializable{
 	
 	
 	public void populateTables(Response[] rs){
-		this.predictionMap = new HashMap<Response, Double>();
-		this.knowledgeMap = new HashMap<Response, Double>();
-		this.likelihoodMap = new HashMap<Response, Double>();
-
 		for(Response r: rs){
 			forwardKnowledgeRecursive(r);
 			predict(r);
@@ -100,8 +101,11 @@ public class KT implements Serializable{
 	 * @param obs
 	 */
 	public void accumulateWeight(Response[] obs){
-		// TODO implement
-	}
+		for(Response r: obs){
+			this.weight += responseProbability(r);
+		}
+
+	} // end of method accumulateWeight
 
 	
 	/**
@@ -109,59 +113,37 @@ public class KT implements Serializable{
 	 * @return the probability of being in the 'know' state at the end of this response
 	 */
 	public double forwardKnowledge(Response r){
-		double unknow = (1 - this.initial);
 		double know = this.initial;
 		
-		// memoize this beast.  in the best case, this should be able to
-		// use previous forward probabilities to compute later ones
-		// TODO: implement that
+		// memoize: we look up what we computed in the past
 		if(this.knowledgeMap.containsKey(r)){
 			return this.knowledgeMap.get(r);
 		}
 		
-		
-		for(boolean obs : r.responses){
-			// transition model
-			// unknow = 	you didn't know it and you stayed that way
-			//          +   you knew it and you forgot
-			// since you can't forget,
-			//        =  (unknow * 1) + (know * 0)
-			
-			// know =       you didn't know it and you learned
-			//           +  you did know it and you stayed that way
-			// likewise,
-			//      =  (unknow * learn) + (know * 1) 
-			
-			know = (unknow * this.learn) + know;
-			
-			
-			// sensor model:
-			if(obs == false){
-				// unknow = you didn't know and you failed to guess 
-				unknow = (unknow * (1-this.guess));
-				
-				// know = you knew and you messed up
-				know *= slip;
-			}else if(obs == true){
-				// unknow = you didn't know and you guessed
-				unknow *= this.guess;
-				
-				// know = you knew and you failed to mess up
-				know *= (1-this.slip);
-			}
-			
-			// normalize
-			double s = unknow + know;
-			unknow /= s;
-			know /= s;
-			
-		} // end of obs for loop
-		
-		
-		// store if we need to
-		if(! this.knowledgeMap.containsKey(r)){
-			this.knowledgeMap.put(r, know);
+		if(r.length() > 0){
+			Response rslice;
+			for(int i = 1; i < r.length(); i++){
+				rslice = r.slice(i);
+
+				// if we need to, look it up
+				if(this.knowledgeMap.containsKey(rslice)){
+					know = this.knowledgeMap.get(rslice);
+
+				}else{
+
+					boolean obs = rslice.last();
+					
+					know = forwardKnowledgeStep(know, obs);
+
+					// store
+					this.knowledgeMap.put(rslice, know);
+				}
+			} // end of slice for loop
 		}
+		
+		// store
+		this.knowledgeMap.put(r, know);
+
 		
 		return know;
 	} // end of method forward
