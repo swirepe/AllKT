@@ -3,6 +3,8 @@ package input;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import model.Response;
 
@@ -16,11 +18,27 @@ public class ReadCSV {
 	} // end of constructor
 	
 	
+	public ReadCSV() {
+		this.header = true;
+		this.filename = null;
+	} // end of default constructor
+
+
 	public Response[] read(){
-		ArrayList<Response> results = new ArrayList<Response>();
 		try{
 			BufferedReader br = new BufferedReader(new FileReader(new File(filename)));
+			return read(br);
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	} // end of method read
 	
+	
+	public Response[] read(BufferedReader br){
+		ArrayList<Response> results = new ArrayList<Response>();
+		try{
+			
 			if(header){ // discard header
 				br.readLine();
 			}
@@ -44,7 +62,21 @@ public class ReadCSV {
 		}
 		
 		return toArray(results);
-	} // end of method read
+	}
+	
+	
+	public Response[] read(InputStream is){
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		
+		return read(br);
+	} // end of overloaded method rea
+	
+	
+	public Response[] read(String filename, boolean header){
+		this.filename = filename;
+		this.header = header;
+		return read();
+	}
 	
 	
 	protected Response[] toArray(ArrayList<Response> ar){
@@ -55,6 +87,4 @@ public class ReadCSV {
 		
 		return results;
 	} // end of method toArray
-	
-
 } // end of class readcsv

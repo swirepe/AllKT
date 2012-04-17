@@ -17,7 +17,7 @@ public class SerializedModelDumper {
 	
 	
 	public void dump(String filename, KTCollection model){
-		FileOutputStream f
+		//FileOutputStream f
 	}
 	
 	

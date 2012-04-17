@@ -1,1 +1,4 @@
 bin/
+*~
+etc/*.txt
+etc/*.zlib

@@ -8,6 +8,7 @@ public class KT implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
 	protected double initial;
 	protected double learn;
 	protected double guess;
@@ -60,7 +61,7 @@ public class KT implements Serializable{
 	
 	public void populateTables(Response[] rs){
 		for(Response r: rs){
-			forwardKnowledgeRecursive(r);
+			forwardKnowledgeMemo(r);
 			predict(r);
 			responseProbability(r);
 		}
@@ -112,33 +113,27 @@ public class KT implements Serializable{
 	 * finds the forward probability of a response string
 	 * @return the probability of being in the 'know' state at the end of this response
 	 */
-	public double forwardKnowledge(Response r){
-		double know = this.initial;
-		
+	public double forwardKnowledge(Response r){		
 		// memoize: we look up what we computed in the past
 		if(this.knowledgeMap.containsKey(r)){
 			return this.knowledgeMap.get(r);
 		}
+		double know = this.initial;
 		
+		double kright = 0;
+		double kwrong = 0;
 		if(r.length() > 0){
-			Response rslice;
-			for(int i = 1; i < r.length(); i++){
-				rslice = r.slice(i);
 
-				// if we need to, look it up
-				if(this.knowledgeMap.containsKey(rslice)){
-					know = this.knowledgeMap.get(rslice);
-
+			for(boolean obs: r.responses){
+				kright = know*(1-this.slip)/(know*(1-this.slip) + this.guess*(1-know));
+				kwrong = know*this.slip/((know*this.slip) + (know*(1-this.guess)));
+				if(obs){
+					know = kright +((1-kright)*this.learn);
 				}else{
-
-					boolean obs = rslice.last();
-					
-					know = forwardKnowledgeStep(know, obs);
-
-					// store
-					this.knowledgeMap.put(rslice, know);
+					know = kwrong + ((1-kwrong)*this.learn);
 				}
-			} // end of slice for loop
+				
+			} // observation loop
 		}
 		
 		// store
@@ -150,70 +145,58 @@ public class KT implements Serializable{
 	
 	
 	/**
-	 * returns pknow for one step from here, given an observation
-	 * @param unknow
-	 * @param know
-	 * @param ob
-	 * @return
-	 */
-	public double forwardKnowledgeStep(double know, boolean ob){
-		// transition:
-		double unknow = 1 - know;
-		know = (unknow * this.learn) + know;
-		
-		// sensor model:
-		if(ob == false){
-			// unknow = you didn't know and you failed to guess 
-			unknow = (unknow * (1-this.guess));
-			
-			// know = you knew and you messed up
-			know *= slip;
-		}else if(ob == true){
-			// unknow = you didn't know and you guessed
-			unknow *= this.guess;
-			
-			// know = you knew and you failed to mess up
-			know *= (1-this.slip);
-		}
-		
-		// normalize
-		double s = unknow + know;
-		unknow /= s;
-		know /= s;
-		
-		return know;
-	} // end of method forwardKnowledgeStep
-	
-	/**
-	 * A recursive, memoized method for finding forward probabilities
-	 * should return identical results to forwardKnowledge
-	 * ^ might run out of stack
-	 * ^ looks up each piece if it needs to
+	 * the only difference between this and forwardKnowledge is that it stores all the intermediate pknows
 	 * @param r
-	 * @return
 	 */
-	public double forwardKnowledgeRecursive(Response r){
+	public double forwardKnowledgeMemo(Response r){
 		if(this.knowledgeMap.containsKey(r)){
 			return this.knowledgeMap.get(r);
-		}else{
-			double pknow = 0;
+		}
+		double know = this.initial;
+		
+		double kright = 0;
+		double kwrong = 0;
+		
+		int index = r.length() - 1;
+		Response rslice;
+		// wind down to the point where we know a pknow
+		while(index > 1){
+			rslice = r.slice(index);
+			if(this.knowledgeMap.containsKey(rslice)){
+				know = this.knowledgeMap.get(rslice);
+				break;
+			}
 			
-			// base case: no observations
-			if(r.length() > 0){
-				pknow = forwardKnowledgeRecursive(r.slice(r.length() - 1));
-				pknow = forwardKnowledgeStep(pknow, r.last());
+			index -= 1;
+		}
+		
+		// once we've found the point we know knowledge at, work forward and
+		// store all intermediate things
+		boolean obs;
+		while(index < r.length()){
+			kright = know*(1-this.slip)/(know*(1-this.slip) + this.guess*(1-know));
+			kwrong = know*this.slip/((know*this.slip) + (know*(1-this.guess)));
+			
+			obs = r.responses[index];
+			if(obs){
+				know = kright +((1-kright)*this.learn);
 			}else{
-				pknow = this.initial;
+				know = kwrong + ((1-kwrong)*this.learn);
 			}
 			
 			// store
-			this.knowledgeMap.put(r, pknow);
+			this.knowledgeMap.put(r.slice(index), know);
 			
-			return pknow;
-		}
-	}// end of method forwardKnowledgerecursive
+			index += 1;
+		} 
+		
+		// finally, store the point we just computed
+		this.knowledgeMap.put(r, know);
+		
+		return know;
+	} // end of method forwardKnowledgeMemo
 	
-	
+
 	
 	/**
 	 * returns the probability that the next thing predicted is a 1.
@@ -320,6 +303,103 @@ public class KT implements Serializable{
 		}
 		return pResponse;  
 	} // end of method responseProbabilityStep
+	
+	/**
+	 * check equality, but only between the parameters
+	 */
+	@Override
+	public boolean equals(Object other){
+		if(! (other instanceof KT)){
+			return false;
+		}
+		
+		KT ktother = (KT)other;
+		if(this.initial != ktother.getInitial()){ return false; }
+		if(this.learn   != ktother.getLearn()  ){ return false; }
+		if(this.guess   != ktother.getGuess()  ){ return false; }
+		if(this.slip    != ktother.getSlip()   ){ return false; }
+		
+		return true;
+	} // end of method equals
+	
+	
+	// ------------------------------------------------------------------------
+	// Getters and setters
+	// ------------------------------------------------------------------------
+	public double getInitial() {
+		return initial;
+	}
+
+
+	public double getLearn() {
+		return learn;
+	}
+
+
+	public double getGuess() {
+		return guess;
+	}
+
+
+	public double getSlip() {
+		return slip;
+	}
+
+
+	public double getWeight() {
+		return weight;
+	}
+
+
+	public double[] getKnowledgeCurve() {
+		return knowledgeCurve;
+	}
+
+
+	public double[] getPerformanceCurve() {
+		return performanceCurve;
+	}
+
+
+	public HashMap<Response, Double> getPredictionMap() {
+		return predictionMap;
+	}
+
+
+	public HashMap<Response, Double> getKnowledgeMap() {
+		return knowledgeMap;
+	}
+
+
+	public HashMap<Response, Double> getLikelihoodMap() {
+		return likelihoodMap;
+	}
+
+
+	public void setKnowledgeCurve(double[] knowledgeCurve) {
+		this.knowledgeCurve = knowledgeCurve;
+	}
+
+
+	public void setPerformanceCurve(double[] performanceCurve) {
+		this.performanceCurve = performanceCurve;
+	}
+
+
+	public void setPredictionMap(HashMap<Response, Double> predictionMap) {
+		this.predictionMap = predictionMap;
+	}
+
+
+	public void setKnowledgeMap(HashMap<Response, Double> knowledgeMap) {
+		this.knowledgeMap = knowledgeMap;
+	}
+
+
+	public void setLikelihoodMap(HashMap<Response, Double> likelihoodMap) {
+		this.likelihoodMap = likelihoodMap;
+	}
+
 	
 	
 } // end of class kt

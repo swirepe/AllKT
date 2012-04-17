@@ -11,6 +11,12 @@ public class WeightedPredictor extends KTRunner {
 		super(model, obs, sem);
 	} // end of constructor
 
+	@Override
+	protected void takeAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 } // end of class WeightedPredictor

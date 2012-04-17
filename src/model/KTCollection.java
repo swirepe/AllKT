@@ -57,6 +57,7 @@ public class KTCollection implements Serializable{
 		}
 		
 		this.KTList = null;
+		System.gc();
 	} // end of convertToArray
 	
 	
@@ -111,6 +112,6 @@ public class KTCollection implements Serializable{
 		
 		prediction /= weight;
 		return prediction;
-	}
+	} // end of weightedPredict
 
 } // end of class KTCollection

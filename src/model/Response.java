@@ -1,11 +1,15 @@
 package model;
 
+import java.io.Serializable;
+
 /* note to self: iterators are dumb and hard in java
 import java.util.Arrays;
 import java.util.Iterator;
 //*/
 
-public class Response{
+public class Response implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	public final boolean[] responses;
 	
 	public Response(boolean[] r){

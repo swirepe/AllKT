@@ -1,6 +1,9 @@
 package model;
 
+import java.io.IOException;
+
 import input.ReadCSV;
+import input.ReadCompressedCSV;
 
 // this is a singleton
 public class AllResponses {
@@ -8,7 +11,7 @@ public class AllResponses {
 	
 	public final Response[] all;
 	
-	public final String responseFilename = "response.1.20.txt";
+	public final String responseFilename = Constants.RESPONSES_INIT;
 	public final boolean header = false;
 	
 	
@@ -27,9 +30,19 @@ public class AllResponses {
 	
 	
 	private Response[] readIn(){
-		ReadCSV reader = new ReadCSV(responseFilename, header);
-		
-		return reader.read();
+		if(Constants.RESPONSES_COMPRESSED){
+			ReadCompressedCSV reader = new ReadCompressedCSV(responseFilename, header);
+			try {
+				return reader.read();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}else{
+			ReadCSV reader = new ReadCSV(responseFilename, header);
+			return reader.read();
+		}
 	}
 
 } // end of class AllResponses
