@@ -21,7 +21,6 @@ public class KTTest {
 		
 		
 		double fprob = model.forwardKnowledge(r);
-		System.out.println(fprob);
 		assertEquals(0.2175,fprob, 0.05);
 		
 		
@@ -47,7 +46,9 @@ public class KTTest {
 		assertEquals(0.8086,fprob2, 0.05);
 	}// end of forwardMemoValueTest
 	
-	
+	/**
+	 * Make sure that we are memoizing things properly
+	 */
 	@Test
 	public void forwardMemoSliceTest(){
 		KT model = new KT(0.1, 0.15, 0.2, 0.1);

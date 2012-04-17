@@ -3,7 +3,7 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import parallel.KTRunner;
+
 import parallel.KTRunnerFactory;
 import parallel.KTRunnerType;
 import parallel.MassRunner;
@@ -65,8 +65,7 @@ public class KTCollection implements Serializable{
 	 * Parallel: find the relative likelihoods for each model
 	 * @param observations
 	 */
-	public void accumulateWeights(Response[] observations){
-		
+	public void accumulateWeightsParallel(Response[] observations){
 		KTRunnerFactory weightFactory = new KTRunnerFactory(KTRunnerType.WeightAcquirer);
 		MassRunner runner = new MassRunner(this.models, observations);
 		
@@ -82,7 +81,6 @@ public class KTCollection implements Serializable{
 	 * @return the probability that the next observed value is a 1
 	 */
 	public double unweightedPredict(Response r){
-		// TODO: implement
 		double prediction = 0;
 		
 		for(KT model: this.models){
@@ -93,6 +91,31 @@ public class KTCollection implements Serializable{
 		
 		return prediction;
 	}
+	
+	
+	/**
+	 * Make predictions for multiple  responses
+	 * @param r
+	 * @return the prediction for each response, in a 1-1 mapped array
+	 */
+	public double[] unweightedPredict(Response[] r){
+		double[] predictions = new double[r.length];
+		
+		for(int i = 0; i < predictions.length; i++){
+			double p = 0;
+			
+			for(KT model: this.models){
+				p += model.predict(r[i]);
+			}
+			
+			p /= this.models.length;
+			predictions[i] = p;
+		}
+		
+		return predictions;
+	}
+	
+	
 	
 	
 	/**
@@ -114,4 +137,31 @@ public class KTCollection implements Serializable{
 		return prediction;
 	} // end of weightedPredict
 
+	
+	public double[] weightedPredict(Response[] r){
+		double[] predictions = new double[r.length];
+		
+		for(int i = 0; i < predictions.length; i++){
+			double weight = 0;
+			double p = 0;
+			for(KT model: this.models){
+				p += model.predict(r[i]);
+				weight += model.getWeight();
+			}
+			
+			predictions[i] = p / weight;
+		}
+		
+		return predictions;
+	}
+	
+	
+	
+	public void initializeModelsParallel(Response[] allDomain){
+		KTRunnerFactory initializerFactory = new KTRunnerFactory(KTRunnerType.TableInitializer);
+		MassRunner runner = new MassRunner(models, allDomain);
+		
+		runner.run(initializerFactory);
+	}
+	
 } // end of class KTCollection

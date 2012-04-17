@@ -1,6 +1,7 @@
 package drivers;
 
 import model.AllResponses;
+import model.KTCollection;
 import parallel.TableInitializer;
 
 /**
@@ -12,8 +13,12 @@ import parallel.TableInitializer;
  */
 public class Initialize {
 	public static void main(String[] args){
+		// generate rainbow tables
 		AllResponses allHolder = AllResponses.getInstance();
+		KTCollection ktc = new KTCollection();
+		ktc.initializeModelsParallel(allHolder.all);
 		
+		// save the ktcollection to disk
 		
 	}
 } // end of class initialize

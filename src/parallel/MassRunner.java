@@ -41,6 +41,17 @@ public class MassRunner {
 		} // end of kt model for loop
 		
 		
+		// don't leave until we have all our permits back,
+		// ie all our subthreads are done
+		while(this.sem.availablePermits() < Constants.NUM_THREADS){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 	} // end of method run
 	
 	

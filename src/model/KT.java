@@ -25,7 +25,7 @@ public class KT implements Serializable{
 	protected HashMap<Response, Double> knowledgeMap;
 
 	// response -> probability of seeing this response
-	protected HashMap<Response, Double> likelihoodMap;
+	protected HashMap<Response, Double> responseMap;
 	
 	
 	protected transient double ZERO = Constants.ZERO;
@@ -41,7 +41,7 @@ public class KT implements Serializable{
 		
 		this.predictionMap = new HashMap<Response, Double>();
 		this.knowledgeMap = new HashMap<Response, Double>();
-		this.likelihoodMap = new HashMap<Response, Double>();
+		this.responseMap = new HashMap<Response, Double>();
 
 		validateParameters();
 	} // end of constructor
@@ -51,19 +51,50 @@ public class KT implements Serializable{
 	 * This generates the curves we'd see regardless of responses
 	 */
 	public void makeCurves(){
-		this.knowledgeCurve = new double[Constants.CURVE_LENGTH];
-		this.performanceCurve = new double[Constants.CURVE_LENGTH];
-		
-		 // TODO implement
+		makeKnowledgeCurve();
+		makePerformanceCurve();
 	} // end of method makeCurves
+	
+	
+	
+	/**
+	 * pcorrect given knowledge curve
+	 */
+	public void makePerformanceCurve(){
+		this.performanceCurve = new double[Constants.CURVE_LENGTH];
+		double know;
+		double pcorrect;
+		double pincorrect;
+		for(int i = 0; i < this.performanceCurve.length; i++){
+			know = this.knowledgeCurve[i];
+			
+			pcorrect = (know*(1-this.slip)) + ((1-know)*this.guess);
+			pincorrect = ((1-know)*(1-this.guess)) + (know*this.slip);
+			this.performanceCurve[i] = pcorrect / (pcorrect + pincorrect);
+		}
+		
+	} // end of makePerformanceCurve
+	
+	
+	public void makeKnowledgeCurve(){
+		this.knowledgeCurve = new double[Constants.CURVE_LENGTH];
+		
+		double know = this.initial;
+		for(int i = 0; i < this.knowledgeCurve.length; i++){
+			this.knowledgeCurve[i] = know;
+			
+			know = know + ((1-know)*this.learn);
+		}
+		
+	} // end of makeKnowledgeCurve
 	
 	
 	
 	public void populateTables(Response[] rs){
 		for(Response r: rs){
 			forwardKnowledgeMemo(r);
-			predict(r);
-			responseProbability(r);
+			predictMemo(r);
+			responseProbabilityMemo(r);
 		}
 		makeCurves();
 	} // end of method populateTables
@@ -207,7 +238,11 @@ public class KT implements Serializable{
 	 * @return probability that the next thing seen is a 1
 	 */
 	public double predict(Response r){
-		double know = 0;
+		if( this.predictionMap.containsKey(r)){
+			return this.predictionMap.get(r);
+		}
+		
+		double know = this.initial;
 		
 		// knowledge: retrieve if we can, otherwise store
 		if(this.knowledgeMap.containsKey(r)){
@@ -230,13 +265,34 @@ public class KT implements Serializable{
 		double s = pcorrect + pincorrect;
 		pcorrect = pcorrect / s;
 		
-		// performance: store if you have to
-		if(! this.predictionMap.containsKey(r)){
-			this.predictionMap.put(r, pcorrect);
-		}
+		// store 
+		this.predictionMap.put(r, pcorrect);
+
 
 		return pcorrect;
 	} // end of method predict
+	
+	
+	
+	/**
+	 * Generate and store all predictions up to the length of the response submitted
+	 * @param r
+	 * @return the probability the next response is 1
+	 */
+	public double predictMemo(Response r){
+		if( this.predictionMap.containsKey(r)){
+			return this.predictionMap.get(r);
+		}
+		// unfortunately, you don't use past predictions to make future ones, so just call
+		// predict on all the the substrings to this point (predict will check
+		// the table for us, so we don't have to here)
+		for(int i = 1; i < r.length(); i++){
+			predict(r.slice(i));
+		}
+
+		return predict(r);
+	} // end of method predictMemo
+	
 	
 	
 	/**
@@ -247,62 +303,86 @@ public class KT implements Serializable{
 	 * @return
 	 */
 	public double responseProbability(Response r){
-		if(this.likelihoodMap.containsKey(r)){
-			return this.likelihoodMap.get(r);
-		}else{
-			double pResponse = 1;
-			
-			if(r.length() > 0){
-				Response rslice;
-				
-				for(int i = 1; i < r.length(); i++){
-					rslice = r.slice(i);
-					
-					// memoize
-					if(this.likelihoodMap.containsKey(rslice)){
-						pResponse *= this.likelihoodMap.get(rslice);
-					}else{
-					
-						double pKnow = this.forwardKnowledge(rslice);
-						boolean obs = rslice.last();
-						
-						pResponse *= responseProbabilityStep(pKnow, obs);
-						
-						// store
-						this.likelihoodMap.put(rslice, pResponse);
-						
-					}
-				}
-				
-
-						
-				// store
-				if(! this.likelihoodMap.containsKey(r)){
-					this.likelihoodMap.put(r, pResponse);
-				}
-				
-			}
-			return pResponse;
+		if(this.responseMap.containsKey(r)){
+			return this.responseMap.get(r);
 		}
+			
+		double pResponse = 1;
+		
+		if(r.length() > 0){
+			boolean obs;
+			double know;
+			Response rslice;
+			for(int i = 1; i <= r.length(); i++){
+				rslice = r.slice(i);
+				know = forwardKnowledge(rslice);
+				obs = rslice.last();
+				if(obs){
+					pResponse *= (know * (1-this.slip)) + ((1-know) * this.guess);
+				}else{
+					pResponse *= (know * this.slip) + ((1-know) * (1-this.guess));
+				}
+			}
+		}
+		
+		// store
+		this.responseMap.put(r, pResponse);
+		
+		return pResponse;
 	} // end of method responseProbability
 	
 	
-
-	
-	public double responseProbabilityStep(double pKnow, boolean ob){
-		double pResponse = 0;
-		if(ob == false){
-			// you got it wrong:
-			//   probability you knew it and slipped + probability you didn't know it and failed to guess
-			pResponse = (pKnow * this.slip) + ((1-pKnow) * (1-this.guess));
-			
-		}else if(ob == true){
-			// you got it right:
-			// probability that you knew it and failed to slip + probability you didn't and guessed
-			pResponse = (pKnow * (1-this.slip)) + ((1-pKnow) * this.guess);
+	/**
+	 * 
+	 * @param r
+	 * @return the probability of this string of responses.  WARNING this can be vanishingly small for long strings
+	 */
+	public double responseProbabilityMemo(Response r){
+		if(this.responseMap.containsKey(r)){
+			return this.responseMap.get(r);
 		}
-		return pResponse;  
-	} // end of method responseProbabilityStep
+		
+		double pResponse = 1;
+		int index = r.length() - 1;
+		Response rslice;
+		// walk backwards until we see one we know
+		while(index > 1){
+			rslice = r.slice(index);
+			if(this.responseMap.containsKey(rslice)){
+				pResponse = this.responseMap.get(rslice);
+				break;
+			}
+			
+			index -= 1;
+		}
+		
+		// now we have a point to start at, so start rolling forward
+		boolean obs;
+		double know;
+		while(index < r.length()){
+			know = forwardKnowledgeMemo(r.slice(index));
+			obs = r.responses[index];
+			
+			if(obs){
+				pResponse *= (know * (1-this.slip)) + ((1-know) * this.guess);
+			}else{
+				pResponse *= (know * this.slip) + ((1-know) * (1-this.guess));
+			}
+			
+			
+			// store
+			this.responseMap.put(r.slice(index), pResponse);
+			
+			index += 1;
+		}
+		
+		// store
+		this.responseMap.put(r, pResponse);
+		
+		return pResponse;
+	} // end of responseProbabilityMemo
+	
+	
 	
 	/**
 	 * check equality, but only between the parameters
@@ -372,7 +452,7 @@ public class KT implements Serializable{
 
 
 	public HashMap<Response, Double> getLikelihoodMap() {
-		return likelihoodMap;
+		return responseMap;
 	}
 
 
@@ -396,8 +476,8 @@ public class KT implements Serializable{
 	}
 
 
-	public void setLikelihoodMap(HashMap<Response, Double> likelihoodMap) {
-		this.likelihoodMap = likelihoodMap;
+	public void setResponseMap(HashMap<Response, Double> responseMap) {
+		this.responseMap = responseMap;
 	}
 
 	

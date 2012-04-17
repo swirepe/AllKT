@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import input.SerializedObjectUncompressor;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 
 import model.KT;
