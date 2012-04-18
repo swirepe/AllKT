@@ -2,7 +2,8 @@ package drivers;
 
 import model.AllResponses;
 import model.KTCollection;
-import parallel.TableInitializer;
+
+import output.CompressedObjectSerializer;
 
 /**
  * 1. make a kt collection
@@ -16,9 +17,18 @@ public class Initialize {
 		// generate rainbow tables
 		AllResponses allHolder = AllResponses.getInstance();
 		KTCollection ktc = new KTCollection();
+		
 		ktc.initializeModelsParallel(allHolder.all);
 		
 		// save the ktcollection to disk
+		CompressedObjectSerializer<KTCollection> cos = new CompressedObjectSerializer<KTCollection>();
 		
+		String fname = "bin/all.ktcollection";
+		
+		try{
+			cos.compressObject(ktc, fname);	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 } // end of class initialize

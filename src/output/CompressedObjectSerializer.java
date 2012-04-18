@@ -16,16 +16,8 @@ public class CompressedObjectSerializer<T extends Serializable> {
 	
 	public void compressObject(final T toCompress, String filename) throws IOException{
 		
-		FileOutputStream fos = new FileOutputStream(new File(filename));
-		GZIPOutputStream gz = new GZIPOutputStream(fos);
-		ObjectOutputStream oos = new ObjectOutputStream(gz);
-		
-		try{
-			oos.writeObject(toCompress);
-			oos.flush();
-		}finally{
-			oos.close();
-		}
+		compressObject(toCompress, new File(filename));
+
 	} // end of method compressObject
 	
 	

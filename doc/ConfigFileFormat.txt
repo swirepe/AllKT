@@ -1,0 +1,18 @@
+[Init]
+step = float
+
+
+
+[Experiment]
+* train = file
+* test = file
+? name = string
+? outfile = file
+? outdb = url
+? outdb_user = string
+? outdb_pass = string
+
+
+[Model]
+* load = file
+? sample
