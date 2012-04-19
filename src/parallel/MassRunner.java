@@ -3,7 +3,8 @@ package parallel;
 import model.KT;
 import model.Response;
 import java.util.concurrent.Semaphore;
-import model.Constants;
+
+import config.Constants;
 
 public class MassRunner {
 

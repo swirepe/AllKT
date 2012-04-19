@@ -3,6 +3,8 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import config.Constants;
+
 
 import parallel.KTRunnerFactory;
 import parallel.KTRunnerType;
@@ -46,6 +48,10 @@ public class KTCollection implements Serializable{
 		}
 		
 		convertToArray();
+		
+		if(Constants.VERBOSE){
+			System.out.println("[KTCollection] Created " + this.models.length + " models.");
+		}
 	} // end of constructor
 	
 	

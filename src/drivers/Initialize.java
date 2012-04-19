@@ -23,7 +23,7 @@ public class Initialize {
 		// save the ktcollection to disk
 		CompressedObjectSerializer<KTCollection> cos = new CompressedObjectSerializer<KTCollection>();
 		
-		String fname = "serial/all.ktcollection";
+		String fname = "all.ktcollection";
 		
 		try{
 			cos.compressObject(ktc, fname);	

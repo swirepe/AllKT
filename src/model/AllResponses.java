@@ -2,6 +2,8 @@ package model;
 
 import java.io.IOException;
 
+import config.Constants;
+
 import input.ReadCSV;
 import input.ReadCompressedCSV;
 

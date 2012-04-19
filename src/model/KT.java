@@ -3,6 +3,8 @@ package model;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import config.Constants;
+
 public class KT implements Serializable{
 	/**
 	 * 
@@ -96,7 +98,12 @@ public class KT implements Serializable{
 			predictMemo(r);
 			responseProbabilityMemo(r);
 		}
+		
 		makeCurves();
+		
+		if(Constants.VERBOSE){
+			System.out.println("[KT] " + this.toString() + " populated with " + rs.length + " responses.");
+		}
 	} // end of method populateTables
 	
 	
@@ -401,6 +408,13 @@ public class KT implements Serializable{
 		
 		return true;
 	} // end of method equals
+	
+	
+	@Override
+	public String toString(){
+		return "(" + this.initial + "," + this.learn + "," + this.guess + "," + this.slip + ")";
+	}
+	
 	
 	
 	// ------------------------------------------------------------------------
