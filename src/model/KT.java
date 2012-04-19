@@ -1,15 +1,25 @@
 package model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 
 import config.Constants;
+import verbose.Timer;
 
-public class KT implements Serializable{
-	/**
-	 * 
-	 */
+public abstract class KT implements Serializable{
+
 	private static final long serialVersionUID = 1L;
+
+	public abstract boolean containsPrediction(Response r);
+	public abstract double getPrediction(Response r);
+	public abstract void storePrediction(Response r, double prediction);
+	
+	public abstract boolean containsKnowledge(Response r);
+	public abstract double getKnowledge(Response r);
+	public abstract void storeKnowledge(Response r, double knowledge);
+	
+	public abstract boolean containsPerformance(Response r);
+	public abstract double getPerformance(Response r);
+	public abstract void storePerformance(Response r, double performance);
 
 	protected double initial;
 	protected double learn;
@@ -20,34 +30,31 @@ public class KT implements Serializable{
 	protected double[] knowledgeCurve;
 	protected double[] performanceCurve;
 	
-	// responses -> pcorrect on next attempt
-	protected HashMap<Response, Double> predictionMap;
-	
-	// responses -> pknowledge
-	protected HashMap<Response, Double> knowledgeMap;
-
-	// response -> probability of seeing this response
-	protected HashMap<Response, Double> responseMap;
-	
-	
 	protected transient double ZERO = Constants.ZERO;
 
-	
-	
-	public KT(double initial, double learn, double guess, double slip) {
+	public KT(double initial, double learn, double guess, double slip){
 		this.initial = initial;
 		this.learn = learn;
 		this.guess = guess;
 		this.slip = slip;
 		
-		
-		this.predictionMap = new HashMap<Response, Double>();
-		this.knowledgeMap = new HashMap<Response, Double>();
-		this.responseMap = new HashMap<Response, Double>();
-
 		validateParameters();
 	} // end of constructor
 	
+	
+	public void populateTables(Response[] rs){
+		Timer.in(this, "[KT] " + this.toString() + " attempting to populate with " + rs.length + " responses.");
+		
+		for(Response r: rs){
+			forwardKnowledgeMemo(r);
+			predictMemo(r);
+			performanceProbabilityMemo(r);
+		}
+		
+		makeCurves();
+		
+		Timer.out(this, "[KT] " + this.toString() + " populated in ");
+	} // end of method populateTables
 	
 	/**
 	 * This generates the curves we'd see regardless of responses
@@ -92,41 +99,45 @@ public class KT implements Serializable{
 	
 	
 	
-	public void populateTables(Response[] rs){
-		for(Response r: rs){
-			forwardKnowledgeMemo(r);
-			predictMemo(r);
-			responseProbabilityMemo(r);
-		}
-		
-		makeCurves();
-		
-		if(Constants.VERBOSE){
-			System.out.println("[KT] " + this.toString() + " populated with " + rs.length + " responses.");
-		}
-	} // end of method populateTables
-	
-	
+
 	
 	/**
-	 * Following Cromwell's rule, we don't want zeros in our probabilities
+	 * Following Cromwell's rule, we don't want zeros in our probabilities.
+	 * This should be called at the end of the constructor
 	 */
-	private void validateParameters(){
-		if(this.initial == 0.0){
+	protected void validateParameters(){
+		if(this.initial <= 0.0){
 			this.initial = ZERO;
 		}
+		if(this.initial >= 1){
+			this.initial = 1.0 - ZERO;
+		}
 		
-		if(this.learn == 0.0){
+		
+		if(this.learn <= 0.0){
 			this.learn = ZERO;
 		}
+		if(this.learn >= 1){
+			this.learn = 1.0 - ZERO;
+		}
 		
-		if(this.guess == 0.0){
+		
+		if(this.guess <= 0.0){
 			this.guess = ZERO;
 		}
+		if(this.guess >= 1){
+			this.guess = 1.0 - ZERO;
+		}
 		
-		if(this.slip == 0.0){
+		
+		if(this.slip <= 0.0){
 			this.slip = ZERO;
 		}
+		if(this.slip >= 1){
+			this.slip = 1.0 - ZERO;
+		}
+		
+		
 	} // end of validateParameters
 	
 	
@@ -141,7 +152,7 @@ public class KT implements Serializable{
 	 */
 	public void accumulateWeight(Response[] obs){
 		for(Response r: obs){
-			this.weight += responseProbability(r);
+			this.weight += performanceProbability(r);
 		}
 
 	} // end of method accumulateWeight
@@ -153,8 +164,8 @@ public class KT implements Serializable{
 	 */
 	public double forwardKnowledge(Response r){		
 		// memoize: we look up what we computed in the past
-		if(this.knowledgeMap.containsKey(r)){
-			return this.knowledgeMap.get(r);
+		if(containsKnowledge(r)){
+			return getKnowledge(r);
 		}
 		double know = this.initial;
 		
@@ -175,7 +186,7 @@ public class KT implements Serializable{
 		}
 		
 		// store
-		this.knowledgeMap.put(r, know);
+		storeKnowledge(r, know);
 
 		
 		return know;
@@ -187,8 +198,8 @@ public class KT implements Serializable{
 	 * @param r
 	 */
 	public double forwardKnowledgeMemo(Response r){
-		if(this.knowledgeMap.containsKey(r)){
-			return this.knowledgeMap.get(r);
+		if(containsKnowledge(r)){
+			return getKnowledge(r);
 		}
 		double know = this.initial;
 		
@@ -200,8 +211,8 @@ public class KT implements Serializable{
 		// wind down to the point where we know a pknow
 		while(index > 1){
 			rslice = r.slice(index);
-			if(this.knowledgeMap.containsKey(rslice)){
-				know = this.knowledgeMap.get(rslice);
+			if(containsKnowledge(rslice)){
+				know = getKnowledge(rslice);
 				break;
 			}
 			
@@ -223,13 +234,13 @@ public class KT implements Serializable{
 			}
 			
 			// store
-			this.knowledgeMap.put(r.slice(index), know);
+			storeKnowledge(r.slice(index), know);
 			
 			index += 1;
 		} 
 		
 		// finally, store the point we just computed
-		this.knowledgeMap.put(r, know);
+		storeKnowledge(r, know);
 		
 		return know;
 	} // end of method forwardKnowledgeMemo
@@ -245,20 +256,12 @@ public class KT implements Serializable{
 	 * @return probability that the next thing seen is a 1
 	 */
 	public double predict(Response r){
-		if( this.predictionMap.containsKey(r)){
-			return this.predictionMap.get(r);
+		if( containsPrediction(r)){
+			return getPrediction(r);
 		}
 		
-		double know = this.initial;
-		
-		// knowledge: retrieve if we can, otherwise store
-		if(this.knowledgeMap.containsKey(r)){
-			know = this.knowledgeMap.get(r);
-		}else{
-			know = forwardKnowledge(r);
-			this.knowledgeMap.put(r, know);
-		}
-		
+		double know = forwardKnowledge(r);
+
 		// transition:
 		know = ((1-know) * this.learn) + know;
 		
@@ -273,7 +276,7 @@ public class KT implements Serializable{
 		pcorrect = pcorrect / s;
 		
 		// store 
-		this.predictionMap.put(r, pcorrect);
+		storePrediction(r, pcorrect);
 
 
 		return pcorrect;
@@ -287,8 +290,8 @@ public class KT implements Serializable{
 	 * @return the probability the next response is 1
 	 */
 	public double predictMemo(Response r){
-		if( this.predictionMap.containsKey(r)){
-			return this.predictionMap.get(r);
+		if( containsPrediction(r) ){
+			return getPrediction(r);
 		}
 		// unfortunately, you don't use past predictions to make future ones, so just call
 		// predict on all the the substrings to this point (predict will check
@@ -309,9 +312,9 @@ public class KT implements Serializable{
 	 * @param r
 	 * @return
 	 */
-	public double responseProbability(Response r){
-		if(this.responseMap.containsKey(r)){
-			return this.responseMap.get(r);
+	public double performanceProbability(Response r){
+		if(containsPerformance(r)){
+			return getPerformance(r);
 		}
 			
 		double pResponse = 1;
@@ -333,7 +336,7 @@ public class KT implements Serializable{
 		}
 		
 		// store
-		this.responseMap.put(r, pResponse);
+		storePerformance(r, pResponse);
 		
 		return pResponse;
 	} // end of method responseProbability
@@ -344,19 +347,19 @@ public class KT implements Serializable{
 	 * @param r
 	 * @return the probability of this string of responses.  WARNING this can be vanishingly small for long strings
 	 */
-	public double responseProbabilityMemo(Response r){
-		if(this.responseMap.containsKey(r)){
-			return this.responseMap.get(r);
+	public double performanceProbabilityMemo(Response r){
+		if(containsPerformance(r)){
+			return getPerformance(r);
 		}
 		
-		double pResponse = 1;
+		double probPerformance = 1;
 		int index = r.length() - 1;
 		Response rslice;
 		// walk backwards until we see one we know
 		while(index > 1){
 			rslice = r.slice(index);
-			if(this.responseMap.containsKey(rslice)){
-				pResponse = this.responseMap.get(rslice);
+			if(containsPerformance(rslice)){
+				probPerformance = getPerformance(rslice);
 				break;
 			}
 			
@@ -371,22 +374,22 @@ public class KT implements Serializable{
 			obs = r.responses[index];
 			
 			if(obs){
-				pResponse *= (know * (1-this.slip)) + ((1-know) * this.guess);
+				probPerformance *= (know * (1-this.slip)) + ((1-know) * this.guess);
 			}else{
-				pResponse *= (know * this.slip) + ((1-know) * (1-this.guess));
+				probPerformance *= (know * this.slip) + ((1-know) * (1-this.guess));
 			}
 			
 			
 			// store
-			this.responseMap.put(r.slice(index), pResponse);
+			storePerformance(r.slice(index), probPerformance);
 			
 			index += 1;
 		}
 		
 		// store
-		this.responseMap.put(r, pResponse);
+		storePerformance(r, probPerformance);
 		
-		return pResponse;
+		return probPerformance;
 	} // end of responseProbabilityMemo
 	
 	
@@ -416,10 +419,6 @@ public class KT implements Serializable{
 	}
 	
 	
-	
-	// ------------------------------------------------------------------------
-	// Getters and setters
-	// ------------------------------------------------------------------------
 	public double getInitial() {
 		return initial;
 	}
@@ -453,23 +452,7 @@ public class KT implements Serializable{
 	public double[] getPerformanceCurve() {
 		return performanceCurve;
 	}
-
-
-	public HashMap<Response, Double> getPredictionMap() {
-		return predictionMap;
-	}
-
-
-	public HashMap<Response, Double> getKnowledgeMap() {
-		return knowledgeMap;
-	}
-
-
-	public HashMap<Response, Double> getLikelihoodMap() {
-		return responseMap;
-	}
-
-
+	
 	public void setKnowledgeCurve(double[] knowledgeCurve) {
 		this.knowledgeCurve = knowledgeCurve;
 	}
@@ -478,22 +461,5 @@ public class KT implements Serializable{
 	public void setPerformanceCurve(double[] performanceCurve) {
 		this.performanceCurve = performanceCurve;
 	}
-
-
-	public void setPredictionMap(HashMap<Response, Double> predictionMap) {
-		this.predictionMap = predictionMap;
-	}
-
-
-	public void setKnowledgeMap(HashMap<Response, Double> knowledgeMap) {
-		this.knowledgeMap = knowledgeMap;
-	}
-
-
-	public void setResponseMap(HashMap<Response, Double> responseMap) {
-		this.responseMap = responseMap;
-	}
-
 	
-	
-} // end of class kt
+} // end of interface KT

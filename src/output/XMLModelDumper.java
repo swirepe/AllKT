@@ -24,7 +24,7 @@ public class XMLModelDumper<T extends Serializable> {
 	public void setupXStream(){
 		this.xstream = new XStream();
 		
-		this.xstream.alias("ktmodel", KT.class);
+		this.xstream.alias("ktmodel", KTHashMap.class);
 		this.xstream.alias("ktcollection", KTCollection.class); 
 		this.xstream.alias("r", Response.class);
 		

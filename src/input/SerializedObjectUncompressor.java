@@ -2,12 +2,9 @@ package input;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.zip.GZIPInputStream;
-
-import model.KT;
 
 public class SerializedObjectUncompressor<T> {
 	
