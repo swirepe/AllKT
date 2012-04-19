@@ -23,6 +23,7 @@ public class KTCollection implements Serializable{
 	protected transient double step = Constants.STEP;
 	protected transient int nthreads = Constants.NUM_THREADS;
 	
+	protected boolean initialized = false;
 	
 	/**
 	 * The set of reasonable models:
@@ -34,7 +35,7 @@ public class KTCollection implements Serializable{
 	 *	slip >= guess  (or guess < slip
 	 */
 	public KTCollection(){	
-		initialize();
+		/* empty default constructor */
 	} // end of constructor
 	
 	
@@ -50,6 +51,7 @@ public class KTCollection implements Serializable{
 	 */
 	public void initialize(){
 		Timer.in(this, "[KTCollection] Attempting to create " + this.getArraySize() + " models.");
+		this.initialized = true;
 		
 		double initial = 0.0;
 		double learn = 0.0;
@@ -109,6 +111,7 @@ public class KTCollection implements Serializable{
 	 * @param observations
 	 */
 	public void accumulateWeightsParallel(Response[] observations){
+		this.lazyInit();
 		Timer.in(this, "[KTCollection] Attempting to accumulate weights in parallel over " + observations.length + " observations.");
 		
 		KTRunnerFactory weightFactory = new KTRunnerFactory(KTRunnerType.WeightAcquirer);
@@ -127,6 +130,7 @@ public class KTCollection implements Serializable{
 	 * @return the probability that the next observed value is a 1
 	 */
 	public double unweightedPredict(Response r){
+		this.lazyInit();
 		double prediction = 0;
 		
 		for(KTHashMap model: this.models){
@@ -145,7 +149,7 @@ public class KTCollection implements Serializable{
 	 * @return the prediction for each response, in a 1-1 mapped array
 	 */
 	public double[] unweightedPredict(Response[] r){
-
+		this.lazyInit();
 		Timer.in(this, "[KTCollection] Attempting unweighted predictions on " + r.length + " responses");
 		
 		double[] predictions = new double[r.length];
@@ -178,6 +182,7 @@ public class KTCollection implements Serializable{
 	 * @return the probability the next response is 1
 	 */
 	public double weightedPredict(Response r){
+		this.lazyInit();
 		double prediction = 0;
 		double weight = 0;
 		for(KTHashMap model: this.models){
@@ -191,7 +196,7 @@ public class KTCollection implements Serializable{
 
 	
 	public double[] weightedPredict(Response[] r){
-		
+		this.lazyInit();
 		Timer.in(this, "[KTCollection] Attempting weighted predictions on " + r.length + " responses");
 		
 		double[] predictions = new double[r.length];
@@ -215,6 +220,7 @@ public class KTCollection implements Serializable{
 	
 	
 	public void initializeModelsParallel(Response[] allDomain){
+		this.lazyInit();
 		Timer.in(this, "[KTCollection] Attempting to initialize models in parallel over  " + allDomain.length + " responses.");
 		
 		KTRunnerFactory initializerFactory = new KTRunnerFactory(KTRunnerType.TableInitializer);
@@ -223,6 +229,15 @@ public class KTCollection implements Serializable{
 		runner.run(initializerFactory);
 		
 		Timer.out(this, "[KTCollection] Successfully initialized models in parallel in ");
+	}
+	
+	/**
+	 * We don't want to make the actual kt models until we call something that needs them
+	 */
+	protected void lazyInit(){
+		if(!this.initialized){
+			this.initialize();
+		}
 	}
 	
 } // end of class KTCollection
