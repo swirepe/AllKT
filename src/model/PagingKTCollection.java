@@ -19,7 +19,34 @@ public class PagingKTCollection extends KTCollection {
 	
 	@Override
 	public void initialize(){
+		if(this.ktfactory == null){
+			this.ktfactory = new KTFactory(); // default type
+		}
+		KT[] modelBatch = new KT[this.getArraySize()];
 		
+		double initial = 0.0;
+		double learn = 0.0;
+		double guess = 0.0;
+		double slip = 0.0;
+		
+		for(initial = 0; initial < 1.0; initial += step){
+			int index = 0;
+			for(learn = 0; learn < 1.0; learn += step){
+				for(slip = 0; slip < 0.5; slip += step){
+					for(guess = 0; guess < (1 - slip); guess += step){
+						modelBatch[index] = this.ktfactory.getInstance(initial, learn, guess, slip);
+						index += 1;
+					}
+				}
+			}
+			saveToPage(modelBatch);
+		}
+		
+	} // end of method initialize
+	
+	
+	protected void saveToPage(KT[] modelBatch){
+		// TODO: implement
 	}
 	
 	

@@ -1,7 +1,6 @@
 package model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import config.Constants;
 
@@ -18,6 +17,7 @@ public class KTCollection implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	protected KT[] models;
+	protected KTFactory ktfactory = null;
 	
 	protected transient double step = Constants.STEP;
 	protected transient int nthreads = Constants.NUM_THREADS;
@@ -38,11 +38,14 @@ public class KTCollection implements Serializable{
 	} // end of constructor
 	
 	
-	public KTCollection(boolean init){
+	public KTCollection(KTFactory ktfactory, boolean init){
+		this.ktfactory = ktfactory;
 		if(init){
 			initialize();
 		}
 	}
+	
+	
 	
 	public KTCollection(KT[] models){
 		this.initialized = true;
@@ -59,6 +62,10 @@ public class KTCollection implements Serializable{
 		Timer.in(this, "[KTCollection] Attempting to create " + this.getArraySize() + " models.");
 		this.initialized = true;
 		
+		if(this.ktfactory == null){
+			ktfactory = new KTFactory(); // default type
+		}
+		
 		double initial = 0.0;
 		double learn = 0.0;
 		double guess = 0.0;
@@ -66,13 +73,13 @@ public class KTCollection implements Serializable{
 		
 		int index = 0;
 		
-		this.models = new KTHashMap[this.getArraySize()];
+		this.models = new KT[this.getArraySize()];
 		
 		for(initial = 0; initial < 1.0; initial += step){
 			for(learn = 0; learn < 1.0; learn += step){
 				for(slip = 0; slip < 0.5; slip += step){
 					for(guess = 0; guess < (1 - slip); guess += step){
-						this.models[index] = new KTHashMap(initial, learn, guess, slip);
+						this.models[index] = this.ktfactory.getInstance(initial, learn, guess, slip);
 						index += 1;
 					}
 				}
@@ -245,5 +252,9 @@ public class KTCollection implements Serializable{
 			this.initialize();
 		}
 	}
+	
+	public void setFactory(KTFactory ktfact){
+		this.ktfactory = ktfact;
+	} // 
 	
 } // end of class KTCollection

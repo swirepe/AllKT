@@ -17,15 +17,27 @@ public class KTMongo extends KT {
 	protected DBCollection predictionCollection;
 	protected DBCollection performanceCollection;
 	
+	protected boolean initialized = false;
+	
+	public KTMongo(double init, double learn, double guess, double slip){
+		super(init, learn, guess, slip);
+		
+	}
+	
 	public KTMongo(double init, double learn, double guess, double slip, DB connection){
 		super(init, learn, guess, slip);
-		this.con = connection;
+		initialize(connection);
+	} // end of constructor
+	
+	
+	public void initialize(DB con){
+		initialized = true;
+		this.con = con;
 		
 		knowledgeCollection   = con.getCollection("knowledge");
 		predictionCollection  = con.getCollection("prediction");
 		performanceCollection = con.getCollection("performance");
-	} // end of constructor
-	
+	}
 	
 	
 	
