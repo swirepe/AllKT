@@ -1,6 +1,6 @@
 package parallel;
 
-import model.KTHashMap;
+import model.KT;
 import model.Response;
 import java.util.concurrent.Semaphore;
 
@@ -8,14 +8,14 @@ import config.Constants;
 
 public class MassRunner {
 
-	protected KTHashMap[] models;
+	protected KT[] models;
 	protected Response[] responses;
 	protected Semaphore sem;
 	
 	
 	
 	
-	public MassRunner(KTHashMap[] models, Response[] responses){
+	public MassRunner(KT[] models, Response[] responses){
 		this.models = models;
 		this.responses = responses;
 		this.sem = new Semaphore(Constants.NUM_THREADS);
@@ -24,7 +24,7 @@ public class MassRunner {
 	
 	public void run(KTRunnerFactory factory){
 		
-		for(KTHashMap model: this.models){
+		for(KT model: this.models){
 			
 			// if there is no free permits, hang out for a bit
 			while(this.sem.availablePermits() <= 0){

@@ -17,8 +17,7 @@ public class KTCollection implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected ArrayList<KTHashMap> KTList = new ArrayList<KTHashMap>();
-	protected KTHashMap[] models;
+	protected KT[] models;
 	
 	protected transient double step = Constants.STEP;
 	protected transient int nthreads = Constants.NUM_THREADS;
@@ -45,6 +44,13 @@ public class KTCollection implements Serializable{
 		}
 	}
 	
+	public KTCollection(KT[] models){
+		this.initialized = true;
+		
+		this.models = new KT[models.length];
+		
+		System.arraycopy(models, 0, this.models, 0, models.length);
+	}
 	
 	/**
 	 * make all the required kt models
@@ -133,7 +139,7 @@ public class KTCollection implements Serializable{
 		this.lazyInit();
 		double prediction = 0;
 		
-		for(KTHashMap model: this.models){
+		for(KT model: this.models){
 			prediction += model.predict(r);
 		}
 		
@@ -157,7 +163,7 @@ public class KTCollection implements Serializable{
 		for(int i = 0; i < predictions.length; i++){
 			double p = 0;
 			
-			for(KTHashMap model: this.models){
+			for(KT model: this.models){
 				p += model.predict(r[i]);
 			}
 			
@@ -185,7 +191,7 @@ public class KTCollection implements Serializable{
 		this.lazyInit();
 		double prediction = 0;
 		double weight = 0;
-		for(KTHashMap model: this.models){
+		for(KT model: this.models){
 			prediction += model.predict(r);
 			weight += model.weight;
 		}
@@ -204,7 +210,7 @@ public class KTCollection implements Serializable{
 		for(int i = 0; i < predictions.length; i++){
 			double weight = 0;
 			double p = 0;
-			for(KTHashMap model: this.models){
+			for(KT model: this.models){
 				p += model.predict(r[i]);
 				weight += model.getWeight();
 			}
