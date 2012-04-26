@@ -1,0 +1,5 @@
+This is the KDD Cup's bridge_to_algebra_2007_2007_train.txt, split up into 70-30 training sets by skill with KTFormatter.
+
+
+https://pslcdatashop.web.cmu.edu/KDDCup/
+https://github.com/swirepe/KTFormatter
