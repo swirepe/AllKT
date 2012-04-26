@@ -4,6 +4,8 @@ package drivers;
 import output.CompressedObjectSerializer;
 import output.WriteCSV;
 import model.KTCollection;
+import model.KTFactory;
+import model.KTType;
 import model.Response;
 
 import input.ReadCSV;
@@ -30,7 +32,9 @@ public class Predict {
 		Response[] train = new ReadCSV(traincsv, false).read();
 		Response[] test = new ReadCSV(testcsv, false).read();
 		
-		KTCollection ktc = new KTCollection();
+		KTFactory ktf = new KTFactory(KTType.KTStorageless);
+		
+		KTCollection ktc = new KTCollection(ktf, false);
 		
 		ktc.accumulateWeightsParallel(train);
 		

@@ -1,20 +1,17 @@
 package input;
 
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.zip.InflaterInputStream;
+import java.util.zip.GZIPInputStream;
+
 
 import model.Response;
 
 /**
- * Note: The interplay between python's zlib and java's deflate is tricky,
- * and not actually worth worrying about.
- * having a smaller file in the repository would be nice to have, but not necessary
- * 
- * see: http://stackoverflow.com/questions/5532591/uncompress-a-zlib-compressed-string-in-java
- * see: http://stackoverflow.com/questions/1089662/python-inflate-and-deflate-implementations
+ * Read in a csv file that has been compressed with gzip
  * 
  * In short, don't be surprised if this class doesn't work.  
  * @author swirepe
@@ -41,9 +38,11 @@ public class ReadCompressedCSV {
 		
 		File f = new File(this.filename);
 		FileInputStream fin = new FileInputStream(f);
-		InflaterInputStream iis = new InflaterInputStream(fin);
+		
+		
+		GZIPInputStream gis = new GZIPInputStream(fin);
 
-		return this.reader.read(iis);
+		return this.reader.read(gis);
 	} // end of method read
 	
 	

@@ -1,5 +1,5 @@
 package model;
 
 public enum KTType {
-	KTHashMap, KTMongo, KTSql
+	KTHashMap, KTMongo, KTSql, KTStorageless
 }

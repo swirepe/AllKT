@@ -5,9 +5,9 @@ rainbow table generation.  Since these files can be big,
 they are gzip compressed by default.
 """
 
-import zlib
+import gzip
 
-COMPRESS = False
+COMPRESS = True
 COMPRESS_LEVEL = 9
 
 def generateUpToT(t=20):
@@ -17,13 +17,12 @@ def generateUpToT(t=20):
     x = "\n".join(x)
     
     if COMPRESS:
-        fname = "responseTo" + str(t) + ".zlib"
-        x = zlib.compress(x, COMPRESS_LEVEL)
+        fname = "responseTo" + str(t) + ".gz"
     else:
         fname = "responseTo" + str(t) + ".txt"
     
     
-    out = open(fname, 'w')
+    out = gzip.open(fname, 'wb')
     out.write(x)
     out.close()
 
@@ -37,12 +36,12 @@ def generateOnlyT(t=20):
     x = "\n".join(x)
     
     if COMPRESS:
-        fname = "responseAt" + str(t) + ".zlib"
-        x = zlib.compress(x, COMPRESS_LEVEL)
+        fname = "responseAt" + str(t) + ".gz"
     else:
         fname = "responseAt" + str(t) + ".txt"
-        
-    out = open(fname, 'w')
+    
+
+    out = gzip.open(fname, 'wb')
     out.write(x) 
     out.close()    
     

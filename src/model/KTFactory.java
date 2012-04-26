@@ -15,6 +15,8 @@ public class KTFactory {
 	
 	public KT getInstance(double init, double learn, double guess, double slip){
 		switch(this.type){
+			case KTStorageless:
+				return new KTStorageless(init, learn, guess, slip);
 			case KTHashMap:
 				return new KTHashMap(init, learn, guess, slip);
 			case KTMongo:
