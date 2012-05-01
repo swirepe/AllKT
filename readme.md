@@ -12,9 +12,18 @@ A research project on bayesian knowledge tracing.  You can see the paper in prog
 >This paper proposes a method to side-step the issue of training individual knowledge tracing models.  The interprebility of Knowledge Tracing allowed us to overlay semantic constraints on the search space.  These constraints let us then roll the entire search space into a single model, effectively making Knowledge Tracing parameterless.
 
 
-## What it uses
+# How to use it
 
-[ini4j](http://ini4j.sourceforge.net/) - Apache 2
+    java -jar jar/main.jar configfile.properties
+
+or 
+
+    java -jar jar/predict.jar experiment_name train.csv test.csv
+
+    
+
+
+## What it uses
 
 [JUnit](http://www.junit.org/) - Common Public License
 
