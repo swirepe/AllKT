@@ -8,14 +8,18 @@ import java.io.File;
  *
  */
 public class PagingKTCollection extends KTCollection {
+	private static final long serialVersionUID = 1L;
 	
-	protected File[] pages;
-	protected KTCollection currentPage;
+	protected transient File[] pages = null;
+	protected KTCollection currentPage = null;
 	
 	public PagingKTCollection(){
 		super();
 	}
 	
+	public PagingKTCollection(KTFactory ktfact, boolean init){
+		super(ktfact, init);
+	}
 	
 	@Override
 	public void initialize(){
@@ -41,12 +45,18 @@ public class PagingKTCollection extends KTCollection {
 			}
 			saveToPage(modelBatch);
 		}
-		
+		this.initialized = true;
 	} // end of method initialize
 	
 	
 	protected void saveToPage(KT[] modelBatch){
-		// TODO: implement
+		// lazy initialization
+		if(this.pages == null){
+			this.pages = new File[this.getNumPages()];
+		}
+		
+		
+		// todo: implement
 	}
 	
 	

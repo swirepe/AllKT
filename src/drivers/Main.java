@@ -6,7 +6,7 @@ import config.Experiment;
 
 public class Main {
 	public static void main(String args[]){
-		System.out.println("Usage: allkt configfile.ini");
+		System.out.println("Usage: allkt configfile.properties");
 		
 		if(args.length == 1){
 			if(Constants.VERBOSE){
@@ -15,9 +15,9 @@ public class Main {
 			
 			
 			ConfigParser config = new ConfigParser();
-			Experiment e = config.parse(args[0]);
+			config.parse(args[0]);
 			
-			e.run();
+			//e.run();
 		}
 		
 		

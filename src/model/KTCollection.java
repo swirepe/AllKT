@@ -136,6 +136,9 @@ public class KTCollection implements Serializable{
 	} // end of method accumulateWeights
 	
 	
+	public void train(Response[] observations){
+		accumulateWeightsParallel(observations);
+	}
 	
 	
 	/**

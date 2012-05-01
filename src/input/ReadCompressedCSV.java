@@ -13,7 +13,6 @@ import model.Response;
 /**
  * Read in a csv file that has been compressed with gzip
  * 
- * In short, don't be surprised if this class doesn't work.  
  * @author swirepe
  *
  */

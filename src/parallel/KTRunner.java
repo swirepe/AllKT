@@ -20,11 +20,10 @@ public abstract class KTRunner implements Runnable{
 		this.model = model;
 		this.obs = obs;
 		this.sem = sem;
-		
 
-		
 	} // end of constructor
 
+	
 	public void run(){
 		try{
 			this.sem.acquire();
