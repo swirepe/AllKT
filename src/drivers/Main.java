@@ -15,9 +15,9 @@ public class Main {
 			
 			
 			ConfigParser config = new ConfigParser();
-			config.parse(args[0]);
+			Experiment e = config.parse(args[0]);
 			
-			//e.run();
+			e.run();
 		}
 		
 		

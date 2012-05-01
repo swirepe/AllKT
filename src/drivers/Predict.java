@@ -3,10 +3,10 @@ package drivers;
 
 import output.CompressedObjectSerializer;
 import output.WriteCSV;
-import model.KTCollection;
 import model.KTFactory;
 import model.KTType;
 import model.Response;
+import model.collection.KTCollection;
 
 import input.ReadCSV;
 

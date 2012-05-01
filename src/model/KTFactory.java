@@ -3,7 +3,7 @@ package model;
 import config.Constants;
 
 public class KTFactory {
-	protected KTType type;
+	public KTType type;
 	
 	public KTFactory(){
 		this.type = Constants.DEFAULT_KT_TYPE;

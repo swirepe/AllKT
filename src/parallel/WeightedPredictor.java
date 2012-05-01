@@ -2,6 +2,9 @@ package parallel;
 
 import java.util.concurrent.Semaphore;
 
+import parallel.storage.Depot;
+import parallel.storage.PredictionDepot;
+
 import model.KT;
 import model.Response;
 

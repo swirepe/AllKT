@@ -7,6 +7,7 @@ import java.io.Serializable;
 import com.thoughtworks.xstream.XStream;
 
 import model.*;
+import model.collection.KTCollection;
 
 /**
  * uses xtream to dump objects to disk

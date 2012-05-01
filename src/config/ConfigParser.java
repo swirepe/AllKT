@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import model.KTType;
-import model.KTCollectionType;
+import model.collection.KTCollectionType;
 
 public class ConfigParser {
 
@@ -40,7 +40,7 @@ public class ConfigParser {
 				exp.setCollectionType(getCollectionType(properties));
 			}
 			
-			exp.setResultsFile(properties.getProperty("results", id + "-results.csv"));
+			exp.setResultsDir(properties.getProperty("results", id));
 			exp.setCollectionOutFile(properties.getProperty("collectionout", id + "-ktcollection.collection"));
 			
 			// training and testing are optional, we can just dump a file out...i guess

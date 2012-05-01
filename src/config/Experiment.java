@@ -1,15 +1,19 @@
 package config;
 
+import java.io.File;
 import java.io.IOException;
+
+import output.CompressedObjectSerializer;
+import output.WriteCSV;
 
 import input.ReadCSV;
 import input.ReadCompressedCSV;
 import input.SerializedObjectUncompressor;
-import model.KTCollection;
-import model.KTCollectionFactory;
-import model.KTCollectionType;
 import model.KTType;
 import model.Response;
+import model.collection.KTCollection;
+import model.collection.KTCollectionFactory;
+import model.collection.KTCollectionType;
 
 public class Experiment {
 	protected String id;
@@ -23,6 +27,9 @@ public class Experiment {
 	protected Response[] train;
 	protected Response[] test;
 	
+	double[] unweighted;
+	double[] weighted;
+	
 	protected String trainFileName;
 	protected String testFileName;
 	
@@ -32,13 +39,13 @@ public class Experiment {
 	protected boolean trainHeader;
 	protected boolean testHeader;
 	
-	protected String resultsFile;
+	protected String resultsDir;
 	protected String collectionOutFile = null;
 	
 	public void run(){
 		setUp();
-
-		// TODO implement
+		doScience();
+		saveStuff();
 	}
 	
 	protected void setUp(){
@@ -46,6 +53,38 @@ public class Experiment {
 		loadTrain();
 		loadTest();
 	} // end of method setUp
+	
+	
+	protected void doScience(){
+		if(train != null){
+			myCollection.accumulateWeightsParallel(train);
+		}
+		
+		if(test != null){
+			this.unweighted = myCollection.unweightedPredictParallel(test);
+			this.weighted = myCollection.weightedPredictParallel(test);
+		}
+	}
+	
+	
+	protected void saveStuff(){
+		WriteCSV uwcsv = new WriteCSV(unweighted, new File(resultsDir,"unweighted.csv"));
+		WriteCSV wwcsv = new WriteCSV(weighted, new File(resultsDir, "weighted.csv"));
+		CompressedObjectSerializer<KTCollection> cos = new CompressedObjectSerializer<KTCollection>();
+		
+		try {
+			uwcsv.write();
+			wwcsv.write();
+			
+			cos.compressObject(myCollection, new File(resultsDir,"kt.collection"));
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
 	
 	
 	protected void loadOrMakeCollection(){
@@ -128,8 +167,12 @@ public class Experiment {
 		this.loadCollectionFile = collectionFile;
 	}
 
-	public void setResultsFile(String resultsFile){
-		this.resultsFile = resultsFile;
+	public void setResultsDir(String resultsDir){
+		this.resultsDir = resultsDir;
+		
+		File f = new File(this.resultsDir);
+		f.mkdir();
+		
 	}
 	
 	public void setCollectionOutFile(String collectionOutFile){

@@ -1,7 +1,7 @@
 package drivers;
 
-import model.AllResponses;
-import model.KTCollection;
+import model.collection.KTCollection;
+import model.response.AllResponses;
 
 import output.CompressedObjectSerializer;
 

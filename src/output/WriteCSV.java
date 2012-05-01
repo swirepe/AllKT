@@ -6,19 +6,24 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class WriteCSV {
-	String filename;
 	double[] data;
-	
+	File file;
 	
 	public WriteCSV(double[] data, String filename){
-		this.filename = filename;
+		this.file = new File(filename);
 		this.data = data;
 	}
 	
+	
+	public WriteCSV(double[] data, File file) {
+		this.data = data;
+		this.file = file;
+	}
+
+	
 	public void write() throws IOException{
 		
-		File f = new File(this.filename);
-		FileWriter fw = new FileWriter(f);
+		FileWriter fw = new FileWriter(this.file);
 		BufferedWriter b = new BufferedWriter(fw);
 		
 		for(double d: this.data){

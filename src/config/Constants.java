@@ -1,7 +1,7 @@
 package config;
 
-import model.KTCollectionType;
 import model.KTType;
+import model.collection.KTCollectionType;
 
 public class Constants {
 	public static final double ZERO = 0.00001;
