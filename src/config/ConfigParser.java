@@ -100,7 +100,7 @@ public class ConfigParser {
 	
 	
 	protected KTCollectionType getCollectionType(Properties p){
-		String collType = p.getProperty("model", Constants.DEFAULT_KTCOL_TYPE_STRING);
+		String collType = p.getProperty("collection", Constants.DEFAULT_KTCOL_TYPE_STRING);
 		
 		return KTCollectionType.valueOf(collType);
 	}

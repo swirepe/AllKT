@@ -15,3 +15,6 @@ results=somedirectory
 loadcollection=pathtocollection
 
 collectionout=somefilename
+
+model=KTHashMap
+collection=PagingKTCollection
