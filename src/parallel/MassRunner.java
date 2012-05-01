@@ -6,14 +6,11 @@ import java.util.concurrent.Semaphore;
 
 import config.Constants;
 
-public class MassRunner {
+public class MassRunner extends Mass{
 
 	protected KT[] models;
 	protected Response[] responses;
 	protected Semaphore sem;
-	
-	
-	
 	
 	public MassRunner(KT[] models, Response[] responses){
 		this.models = models;
@@ -21,39 +18,11 @@ public class MassRunner {
 		this.sem = new Semaphore(Constants.NUM_THREADS);
 	}
 	
+	@Override
+	public Runnable makeThread(KT model){
+		return factory.getInstance(model, responses);
+	}
 	
-	public void run(KTRunnerFactory factory){
-		
-		for(KT model: this.models){
-			
-			// if there is no free permits, hang out for a bit
-			while(this.sem.availablePermits() <= 0){
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// muted
-				} 
-			}
-			
-			new Thread(
-				factory.getInstance(model, responses, sem)
-			).start();
-			
-		} // end of kt model for loop
-		
-		
-		// don't leave until we have all our permits back,
-		// ie all our subthreads are done
-		while(this.sem.availablePermits() < Constants.NUM_THREADS){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-	} // end of method run
-	
+	/* other methods inherited */
 	
 } // end of class massRunner

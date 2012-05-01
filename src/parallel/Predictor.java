@@ -5,49 +5,41 @@ import java.util.concurrent.Semaphore;
 import model.KT;
 import model.Response;
 
-public class Predictor extends KTRunner {
+public class Predictor extends KTAccumulator {
 
-	public static double[] predictions = null;
-	protected double[] myPredictions;
-	public static Semaphore additionSemaphore = new Semaphore(1);
+	double[] myPredictions;
+	double myWeight = 1.0;
 	
-	public Predictor(KT model, Response[] obs, Semaphore sem) {
-		super(model, obs, sem);
+	public Predictor(KT model, Response[] obs, Semaphore sem, PredictionDepot depositor) {
+		super(model, obs, sem, depositor);
 
-		myPredictions = new double[obs.length];
-		initPredictions(obs.length);
 	} // end of constructor
 	
 	
-	public static void initPredictions(int length){
-		if(predictions == null){
-			predictions = new double[length];
-		}
-	} // end of static init method
 
 	
-	public void addMyPredictions(){
-		try {
-			additionSemaphore.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		
-		for(int i = 0; i < myPredictions.length; i++){
-			predictions[i] += myPredictions[i];
-		}
-		
-		
-		additionSemaphore.release();
-	}
-
-	
-	protected void takeAction(){
+	public void takeAction(){
+		myPredictions = new double[obs.length];
 		for(int i = 0; i < myPredictions.length; i++){
 			myPredictions[i] = this.model.predict(this.obs[i]);
 		}
-		addMyPredictions();
+	}
+
+
+	@Override
+	public void deposit() {
+		while(!this.depositor.tryAcquire()){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		((PredictionDepot) this.depositor).addPrediction(myPredictions);
+		((PredictionDepot) this.depositor).addWeight(myWeight);
+		this.depositor.release();
+		
 	}
 	
 	

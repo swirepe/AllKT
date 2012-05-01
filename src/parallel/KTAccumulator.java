@@ -5,18 +5,22 @@ import java.util.concurrent.Semaphore;
 import model.KT;
 import model.Response;
 
-public abstract class KTRunner implements Runnable{
+/**
+ *  A class for gathering data out from a kt model 
+ */
+public abstract class KTAccumulator extends KTRunner implements Runnable{
 	protected KT model;
 	protected Response[] obs;
 	protected Semaphore sem;
+	protected Depot depositor;
 	
-	/**
-	 * wrap an action in a thread
-	 */
-	public KTRunner(KT model, Response[] obs, Semaphore sem){
+	
+	public KTAccumulator(KT model, Response[] obs, Semaphore sem, Depot depositor){
+		super(model, obs, sem);
 		this.model = model;
 		this.obs = obs;
 		this.sem = sem;
+		this.depositor = depositor;
 
 	} // end of constructor
 
@@ -29,13 +33,16 @@ public abstract class KTRunner implements Runnable{
 		}
 		
 		takeAction();
+		deposit();
 		
 		this.sem.release();
 		
 	} // end of method run
 	
 	
-	protected abstract void takeAction();
-
+	public abstract void deposit();
 	
-} // end of class KTRunner
+	public abstract void takeAction(); 
+	
+	
+} // end of class KTAccumulator

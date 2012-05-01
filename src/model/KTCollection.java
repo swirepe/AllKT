@@ -5,9 +5,13 @@ import java.io.Serializable;
 import config.Constants;
 
 
+import parallel.KTAccumulatorFactory;
+import parallel.KTAccumulatorType;
 import parallel.KTRunnerFactory;
 import parallel.KTRunnerType;
+import parallel.MassAccumulator;
 import parallel.MassRunner;
+import parallel.PredictionDepot;
 
 import verbose.Timer;
 
@@ -188,7 +192,45 @@ public class KTCollection implements Serializable{
 	}
 	
 	
+	public double[] unweightedPredictParallel(Response[] r){
+		return unweightedPredictParallelDepot(r, new PredictionDepot(r.length)).getPredictions();
+	}
 	
+	
+	public PredictionDepot unweightedPredictParallelDepot(Response[] r){
+		return unweightedPredictParallelDepot(r, new PredictionDepot(r.length));
+	}
+	
+	
+	public PredictionDepot unweightedPredictParallelDepot(Response[] r, PredictionDepot pd){
+		this.lazyInit();
+		KTAccumulatorFactory ktaccf = new KTAccumulatorFactory(KTAccumulatorType.Predictor);
+		
+		MassAccumulator ma = new MassAccumulator(this.models, r, pd);
+		ma.run(ktaccf);
+		
+		return pd;
+	}
+	
+	
+	public double[] weightedPredictParallel(Response[] r){
+		return weightedPredictParallelDepot(r).getPredictions();
+	}
+	
+	public PredictionDepot weightedPredictParallelDepot(Response[] r){
+		return weightedPredictParallelDepot(r, new PredictionDepot());
+	}
+	
+	
+	public PredictionDepot weightedPredictParallelDepot(Response[] r, PredictionDepot pd){
+		this.lazyInit();
+		KTAccumulatorFactory ktaccf = new KTAccumulatorFactory(KTAccumulatorType.WeightedPredictor);
+		
+		MassAccumulator ma = new MassAccumulator(this.models, r, pd);
+		ma.run(ktaccf);
+		
+		return pd;
+	}
 	
 	/**
 	 * Take the weighted mean of the predictions, assuming that
@@ -247,6 +289,18 @@ public class KTCollection implements Serializable{
 		Timer.out(this, "[KTCollection] Successfully initialized models in parallel in ");
 	}
 	
+	
+	public double getTotalWeight(){
+		lazyInit(); // better than a null pointer exception
+		
+		double result = 0.0;
+		for(KT model: this.models){
+			result += model.weight;
+		}
+		return result;
+	}
+	
+	
 	/**
 	 * We don't want to make the actual kt models until we call something that needs them
 	 */
@@ -259,5 +313,17 @@ public class KTCollection implements Serializable{
 	public void setFactory(KTFactory ktfact){
 		this.ktfactory = ktfact;
 	} // 
+	
+	@Override
+	public String toString(){
+		lazyInit();
+		StringBuffer sb = new StringBuffer();
+		
+		for(KT model: this.models){
+			sb.append(model.toString());
+		}
+		return sb.toString();
+	} // end of method toString
+	
 	
 } // end of class KTCollection

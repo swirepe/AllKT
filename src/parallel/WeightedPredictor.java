@@ -5,18 +5,17 @@ import java.util.concurrent.Semaphore;
 import model.KT;
 import model.Response;
 
-public class WeightedPredictor extends KTRunner {
+/**
+ * the only difference: each prediction is worth its weight now, instead of 1
+ * @author swirepe
+ *
+ */
+public class WeightedPredictor extends Predictor {
 
-	public WeightedPredictor(KT model, Response[] obs, Semaphore sem) {
-		super(model, obs, sem);
+	public WeightedPredictor(KT model, Response[] obs, Semaphore sem, Depot depositor) {
+		super(model, obs, sem, (PredictionDepot) depositor);
+		myWeight = this.model.getWeight();
 	} // end of constructor
-
-	@Override
-	protected void takeAction() {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 
 } // end of class WeightedPredictor
