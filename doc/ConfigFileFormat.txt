@@ -1,18 +1,17 @@
-[Init]
-step = float
+verbose=true
+step=0.01
+threads=16
 
+id=whatever
 
+trainheader=false
+testheader=false
 
-[Experiment]
-* train = file
-* test = file
-? name = string
-? outfile = file
-? outdb = url
-? outdb_user = string
-? outdb_pass = string
+traincompressed=false
+testcompressed=false
 
+results=somedirectory
 
-[Model]
-* load = file
-? sample
+loadcollection=pathtocollection
+
+collectionout=somefilename

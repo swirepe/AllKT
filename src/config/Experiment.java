@@ -76,7 +76,7 @@ public class Experiment {
 			uwcsv.write();
 			wwcsv.write();
 			
-			cos.compressObject(myCollection, new File(resultsDir,"kt.collection"));
+			cos.compressObject(myCollection, new File(resultsDir,this.collectionOutFile));
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
