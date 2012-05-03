@@ -55,6 +55,11 @@ public class Experiment {
 	} // end of method setUp
 	
 	
+	/**
+	 * Run the experiment:
+	 * train (if applicable)
+	 * then test (if applicable)
+	 */
 	protected void doScience(){
 		if(train != null){
 			myCollection.accumulateWeightsParallel(train);

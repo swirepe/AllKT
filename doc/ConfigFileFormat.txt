@@ -4,17 +4,37 @@ threads=16
 
 id=whatever
 
+# do the train and test files have
+# headers that need to be stripped?
 trainheader=false
 testheader=false
 
+
+# are train or test files compressed with gzip?
 traincompressed=false
 testcompressed=false
 
+
 results=somedirectory
+
 
 loadcollection=pathtocollection
 
 collectionout=somefilename
 
+
+# model can be anything in KTType.java:
+# KTHashMap, KTMongo, KTSql, KTStorageless
 model=KTHashMap
+
+
+# collection can be anything in KTCollectionType:
+# KTCollection, PagingKTCollection
 collection=PagingKTCollection
+
+
+# hold out the last value when predicting.
+# this causes the experiment to output an "actual.csv"
+# with the values it tried to predict --
+# otherwise, you'll need to keep the actual values somewhere else
+predictminus1=false
