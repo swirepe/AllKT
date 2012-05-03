@@ -21,4 +21,9 @@ public class Constants {
 	public static int NUM_THREADS = 16;
 	public static double STEP = 0.05;
 	public static boolean VERBOSE = true;
+	
+	// if we receive a response string of 10, ignore the 10th when making the prediction
+	// this way, we don't have to hold out that last response in a separate place
+	public static boolean PREDICT_MINUS_1 = false;
+	
 }

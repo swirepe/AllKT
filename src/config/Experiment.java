@@ -83,6 +83,22 @@ public class Experiment {
 			e.printStackTrace();
 		}
 		
+		// if we didn't use the last value for prediction, we can report it
+		if(Constants.PREDICT_MINUS_1){
+			writeActualValue();
+		}
+	}
+	
+	
+	protected void writeActualValue(){
+		double[] actual = Response.eachLast(test);
+		WriteCSV actualcsv = new WriteCSV(actual, new File(resultsDir,"actual.csv"));
+		
+		try{
+			actualcsv.write();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 	}
 	

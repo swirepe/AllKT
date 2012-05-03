@@ -74,5 +74,18 @@ public class Response implements Serializable{
 		return this.responses[this.responses.length - 1];
 	}
 	
+	public Response allButLast(){
+		return this.slice(this.length() - 1);
+	}
+	
+	public static double[] eachLast(Response[] rs){
+		double[] lasts = new double[rs.length];
+		
+		for(int i = 0; i < rs.length; i++){
+			lasts[i] = rs[i].last() ? 1.0 : 0.0;
+		}
+		
+		return lasts;
+	}
 	
 } // end of class Response

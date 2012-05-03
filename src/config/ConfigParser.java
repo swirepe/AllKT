@@ -22,6 +22,7 @@ public class ConfigParser {
 			Constants.VERBOSE = Boolean.parseBoolean(properties.getProperty("verbose", "true"));
 			Constants.STEP = Double.parseDouble(properties.getProperty("step", "0.01"));
 			Constants.NUM_THREADS = Integer.parseInt(properties.getProperty("threads", "16"));
+			Constants.PREDICT_MINUS_1 = Boolean.parseBoolean(properties.getProperty("predictminus1", "false"));
 			
 			// list all the properties
 			if(Constants.VERBOSE){

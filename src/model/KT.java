@@ -252,10 +252,18 @@ public abstract class KT implements Serializable{
 	 * 
 	 * Pulls the forward probability out of the knowledge map.
 	 * If it isn't in there, it computes it and puts it in the map as a side effect
+	 * 
+	 * If constants.predict_minus_1 is true, it holds off on using the last value
+	 * in making the prediction.
+	 *  
 	 * @param r: a string of responses
 	 * @return probability that the next thing seen is a 1
 	 */
 	public double predict(Response r){
+		if(Constants.PREDICT_MINUS_1){
+			r = r.allButLast();
+		}
+		
 		if( containsPrediction(r)){
 			return getPrediction(r);
 		}
