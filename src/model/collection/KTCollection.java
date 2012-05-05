@@ -208,11 +208,13 @@ public class KTCollection implements Serializable{
 	
 	public PredictionDepot unweightedPredictParallelDepot(Response[] r, PredictionDepot pd){
 		this.lazyInit();
+		Timer.in(this, "[KTCollection] Attempting unweighted predictions on " + r.length + " responses in parallel.");
 		KTAccumulatorFactory ktaccf = new KTAccumulatorFactory(KTAccumulatorType.Predictor);
 		
 		MassAccumulator ma = new MassAccumulator(this.models, r, pd);
 		ma.run(ktaccf);
 		
+		Timer.out(this, "[KTCollection] Completed unweighted predictions in ");
 		return pd;
 	}
 	
@@ -228,11 +230,14 @@ public class KTCollection implements Serializable{
 	
 	public PredictionDepot weightedPredictParallelDepot(Response[] r, PredictionDepot pd){
 		this.lazyInit();
+		Timer.in(this, "[KTCollection] Attempting weighted predictions on " + r.length + " responses in parallel.");
+		
 		KTAccumulatorFactory ktaccf = new KTAccumulatorFactory(KTAccumulatorType.WeightedPredictor);
 		
 		MassAccumulator ma = new MassAccumulator(this.models, r, pd);
 		ma.run(ktaccf);
 		
+		Timer.out(this, "[KTCollection] Completed weighted predictions in ");
 		return pd;
 	}
 	
@@ -295,7 +300,7 @@ public class KTCollection implements Serializable{
 	
 	
 	public double getTotalWeight(){
-		lazyInit(); // better than a null pointer exception
+		this.lazyInit(); // better than a null pointer exception
 		
 		double result = 0.0;
 		for(KT model: this.models){
@@ -320,7 +325,7 @@ public class KTCollection implements Serializable{
 	
 	@Override
 	public String toString(){
-		lazyInit();
+		this.lazyInit();
 		StringBuffer sb = new StringBuffer();
 		
 		for(KT model: this.models){

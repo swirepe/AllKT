@@ -2,7 +2,9 @@ verbose=true
 step=0.01
 threads=16
 
+# this will be generated automatically if you leave it out
 id=whatever
+
 
 # do the train and test files have
 # headers that need to be stripped?

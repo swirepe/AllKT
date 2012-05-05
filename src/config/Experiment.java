@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import output.CompressedObjectSerializer;
 import output.WriteCSV;
+import verbose.Timer;
 
 import input.ReadCSV;
 import input.ReadCompressedCSV;
@@ -49,9 +50,10 @@ public class Experiment {
 	}
 	
 	protected void setUp(){
-		loadOrMakeCollection();
 		loadTrain();
 		loadTest();
+
+		loadOrMakeCollection();
 	} // end of method setUp
 	
 	
@@ -62,12 +64,16 @@ public class Experiment {
 	 */
 	protected void doScience(){
 		if(train != null){
+			Timer.in(this, "[Experiment] Accumulating weights in parallel");
 			myCollection.accumulateWeightsParallel(train);
+			Timer.out(this, "[Experiment] Weights accumulated in ");
 		}
 		
 		if(test != null){
+			Timer.in(this, "[Experiment] Making predictions in parallel");
 			this.unweighted = myCollection.unweightedPredictParallel(test);
 			this.weighted = myCollection.weightedPredictParallel(test);
+			Timer.out(this, "[Experiment] Predictions completed in ");
 		}
 	}
 	
@@ -112,7 +118,7 @@ public class Experiment {
 		// make a new collection if we don't have one to load
 		if(loadCollectionFile == null){
 			KTCollectionFactory ktcfact = new KTCollectionFactory(this.collectionType, this.modelType);
-			this.myCollection = ktcfact.getInstance();
+			this.myCollection = ktcfact.getInstance(true);
 		}else{
 			// otherwise read the file off disk if we have a name for it
 			try{
@@ -141,16 +147,22 @@ public class Experiment {
 	protected void loadCSV(Response[] destination, String fname, boolean header, boolean compressed){
 		// we don't have to load
 		if(fname == null){
+			if(Constants.VERBOSE){
+				System.out.println("[Experiment] Not reading in csv.");
+			}
 			return;
 		}
-
+		Response r[];
 		try {
 			if(compressed){
-				destination = (new ReadCompressedCSV(fname, header)).read();
+				r = (new ReadCompressedCSV(fname, header)).read();
+				
 			}else{
-				destination = (new ReadCSV(fname, header)).read();
+				System.out.println(fname);
+				r = (new ReadCSV(fname, header)).read();
 			}
 		
+			System.arraycopy(r, 0, destination, 0, r.length);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Failed to read " + fname);

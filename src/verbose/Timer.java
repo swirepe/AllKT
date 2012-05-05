@@ -37,7 +37,7 @@ public class Timer {
 			try{
 				long end = System.nanoTime();
 				long time = end - called.get(caller);
-				System.out.println(message + TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS) + " minutes.");
+				System.out.println(message + TimeUnit.SECONDS.convert(time, TimeUnit.NANOSECONDS) + " minutes.");
 				
 				called.remove(caller);
 			}catch(Exception e){

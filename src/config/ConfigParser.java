@@ -24,10 +24,12 @@ public class ConfigParser {
 			Constants.NUM_THREADS = Integer.parseInt(properties.getProperty("threads", "16"));
 			Constants.PREDICT_MINUS_1 = Boolean.parseBoolean(properties.getProperty("predictminus1", "false"));
 			
+			
 			// list all the properties
 			if(Constants.VERBOSE){
 				System.out.println("[Config] " + filename + " contains these properties:");
 				properties.list(System.out);
+				System.out.println("------------------------");
 			}
 
 			String id = getID(properties);
@@ -93,13 +95,15 @@ public class ConfigParser {
 		return id;
 	}
 	
+	
+	// where model types are defined in KTTypes
 	protected KTType getModelType(Properties p){
 		String modelString = p.getProperty("model", Constants.DEFAULT_KT_TYPE_STRING);
 		
 		return KTType.valueOf(modelString);
 	}
 	
-	
+	// where collection is defined in KTCollectionTypes
 	protected KTCollectionType getCollectionType(Properties p){
 		String collType = p.getProperty("collection", Constants.DEFAULT_KTCOL_TYPE_STRING);
 		
