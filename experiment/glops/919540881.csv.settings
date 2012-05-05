@@ -1,0 +1,8 @@
+threads=32
+train=../data/glops_formatted/train/919540881.csv
+test=../data/glops_formatted/test/919540881.csv
+traincompressed=false
+testcompressed=false
+model=KTStorageless
+collection=KTCollection
+predictminus1=true

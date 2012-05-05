@@ -162,6 +162,7 @@ public class Experiment {
 				r = (new ReadCSV(fname, header)).read();
 			}
 		
+			destination = new Response[r.length];
 			System.arraycopy(r, 0, destination, 0, r.length);
 		} catch (IOException e) {
 			e.printStackTrace();
