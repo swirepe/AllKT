@@ -9,6 +9,6 @@ for f in fs:
 		out.write("traincompressed=false\n")
 		out.write("testcompressed=false\n")
 		out.write("model=KTStorageless\n")
-		out.write("collection=KTCollection\n")
+		out.write("collection=PagingKTCollection\n")
 		out.write("predictminus1=true")
 		out.close()

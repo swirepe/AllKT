@@ -1,5 +1,5 @@
 package model.collection;
 
 public enum KTCollectionType {
-	KTCollection, PagingKTCollection
+	KTCollection, PagingKTCollection, HollowKTCollection, WeightOnlyKTCollection
 }

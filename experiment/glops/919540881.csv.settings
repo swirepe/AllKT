@@ -4,5 +4,5 @@ test=../data/glops_formatted/test/919540881.csv
 traincompressed=false
 testcompressed=false
 model=KTStorageless
-collection=KTCollection
+collection=PagingKTCollection
 predictminus1=true

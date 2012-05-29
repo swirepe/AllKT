@@ -4,7 +4,6 @@ import input.SerializedObjectUncompressor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 import model.KT;
 import model.KTFactory;
@@ -95,8 +94,8 @@ public class PagingKTCollection extends KTCollection {
 	
 	
 	protected void saveToPage(KTCollection page){
-		String pageName = UUID.fromString(page.toString()).toString();
-		
+		makePageDir();
+		String pageName = "" + page.toString().hashCode();
 		
 		try{
 			compressor.compressObject(page, new File(this.pageDir, pageName));
@@ -109,10 +108,14 @@ public class PagingKTCollection extends KTCollection {
 	
 	
 	public void updatePages(){
+		makePageDir();
 		this.pages = (new File(this.pageDir)).listFiles();
 	}
 	
 	
+	public void makePageDir(){
+		new File(this.pageDir).mkdir();
+	}
 	
 	public KTCollection openPage(File p){
 		KTCollection current = null;

@@ -31,7 +31,7 @@ public class WriteCSV {
 		}
 		
 		fw.close();
-		b.close();
+		//b.close();
 		
 	}
 	

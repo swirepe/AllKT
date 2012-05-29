@@ -3,7 +3,7 @@ from glob import glob
 import os
 import sys
 
-vmsize = "-Xmx1911m"
+vmsize = "-Xmx1070m"
 
 settings = glob("glops/*.settings")
 

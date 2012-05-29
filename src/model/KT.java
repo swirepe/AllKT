@@ -427,6 +427,13 @@ public abstract class KT implements Serializable{
 	}
 	
 	
+	public void setParameters(double init, double learn, double guess, double slip){
+		this.initial = init;
+		this.learn = learn;
+		this.guess = guess;
+		this.slip = slip;
+	}
+	
 	public double getInitial() {
 		return initial;
 	}

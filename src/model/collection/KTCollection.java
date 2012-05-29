@@ -149,6 +149,14 @@ public class KTCollection implements Serializable{
 	}
 	
 	
+	public double[] testUnweighted(Response[] r){
+		return unweightedPredictParallel(r);
+	}
+	
+	public double[] testWeighted(Response[] r){
+		return weightedPredictParallel(r);
+	}
+	
 	/**
 	 * 
 	 * @return the probability that the next observed value is a 1

@@ -15,6 +15,7 @@ import model.Response;
 import model.collection.KTCollection;
 import model.collection.KTCollectionFactory;
 import model.collection.KTCollectionType;
+import model.collection.PagingKTCollection;
 
 public class Experiment {
 	protected String id;
@@ -65,15 +66,19 @@ public class Experiment {
 	protected void doScience(){
 		if(train != null){
 			Timer.in(this, "[Experiment] Accumulating weights in parallel");
-			myCollection.accumulateWeightsParallel(train);
+			myCollection.train(train);
 			Timer.out(this, "[Experiment] Weights accumulated in ");
+		}else{
+			System.out.println("[Experiment] Skipping Accumulating weights.");
 		}
 		
 		if(test != null){
 			Timer.in(this, "[Experiment] Making predictions in parallel");
-			this.unweighted = myCollection.unweightedPredictParallel(test);
-			this.weighted = myCollection.weightedPredictParallel(test);
+			this.unweighted = myCollection.testUnweighted(test);
+			this.weighted = myCollection.testWeighted(test);
 			Timer.out(this, "[Experiment] Predictions completed in ");
+		}else{
+			System.out.println("[Experiment] Skipping testing.");
 		}
 	}
 	
@@ -119,6 +124,12 @@ public class Experiment {
 		if(loadCollectionFile == null){
 			KTCollectionFactory ktcfact = new KTCollectionFactory(this.collectionType, this.modelType);
 			this.myCollection = ktcfact.getInstance(true);
+			
+			// specify where the pages should go
+			if(this.collectionType == KTCollectionType.PagingKTCollection){
+				((PagingKTCollection)this.myCollection).setPageDir(new File(this.resultsDir, "pages").toString());
+			}
+			
 		}else{
 			// otherwise read the file off disk if we have a name for it
 			try{
@@ -135,22 +146,22 @@ public class Experiment {
 	
 	
 	protected void loadTrain(){
-		this.loadCSV(this.train, this.trainFileName, this.trainHeader, this.trainCompressed);
+		this.train = this.loadCSV(this.trainFileName, this.trainHeader, this.trainCompressed);
 	} // end of method loadTrain
 	
 	
 	protected void loadTest(){
-		this.loadCSV(this.test, this.testFileName, this.testHeader, this.testCompressed);
+		this.test = this.loadCSV(this.testFileName, this.testHeader, this.testCompressed);
 	} // end of method loadTest
 	
 	
-	protected void loadCSV(Response[] destination, String fname, boolean header, boolean compressed){
+	protected Response[] loadCSV(String fname, boolean header, boolean compressed){
 		// we don't have to load
 		if(fname == null){
 			if(Constants.VERBOSE){
 				System.out.println("[Experiment] Not reading in csv.");
 			}
-			return;
+			return null;
 		}
 		Response r[];
 		try {
@@ -158,16 +169,17 @@ public class Experiment {
 				r = (new ReadCompressedCSV(fname, header)).read();
 				
 			}else{
-				System.out.println(fname);
+				
 				r = (new ReadCSV(fname, header)).read();
 			}
 		
-			destination = new Response[r.length];
-			System.arraycopy(r, 0, destination, 0, r.length);
+			return r;
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Failed to read " + fname);
 		}
+		
+		return null;
 	} // end of method loadCSV
 	
 	
