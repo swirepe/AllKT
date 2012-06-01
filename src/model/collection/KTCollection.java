@@ -337,7 +337,7 @@ public class KTCollection implements Serializable{
 		StringBuffer sb = new StringBuffer();
 		
 		for(KT model: this.models){
-			sb.append(model.toString());
+			sb.append(model.toString() + "\n");
 		}
 		return sb.toString();
 	} // end of method toString

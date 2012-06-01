@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import output.CompressedObjectSerializer;
 import output.WriteCSV;
+import output.WriteTextFile;
 import verbose.Timer;
 
 import input.ReadCSV;
@@ -103,7 +104,19 @@ public class Experiment {
 		if(Constants.PREDICT_MINUS_1){
 			writeActualValue();
 		}
+		
+		writeCollectionString();
 	}
+	
+	
+	protected void writeCollectionString(){
+		WriteTextFile wtf = new WriteTextFile(
+				new File(resultsDir,
+				    	 "collectionString.txt"),
+		    	this.myCollection.toString());
+		
+		wtf.write();
+	} // end of method writeCollectionString
 	
 	
 	protected void writeActualValue(){

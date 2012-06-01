@@ -321,4 +321,18 @@ public class PagingKTCollection extends KTCollection {
 		this.pageDir = pageDir;
 	}
 	
+	
+	@Override
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+		
+		updatePages();
+		 
+		for(File p: this.pages){
+			KTCollection current = openPage(p);
+			sb.append(current.toString() + "\n\n---[page]---\n\n");
+		}
+		
+		return sb.toString();
+	}
 } // end of class PagingKTCollection

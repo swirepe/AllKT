@@ -423,7 +423,7 @@ public abstract class KT implements Serializable{
 	
 	@Override
 	public String toString(){
-		return "(" + this.initial + "," + this.learn + "," + this.guess + "," + this.slip + ")";
+		return "(" + this.initial + "," + this.learn + "," + this.guess + "," + this.slip + "," + this.weight + ")";
 	}
 	
 	
