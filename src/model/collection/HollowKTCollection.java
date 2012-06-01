@@ -98,7 +98,10 @@ public class HollowKTCollection extends KTCollection{
 			}
 		}
 		
-		System.arraycopy(weightContainer.values, 0, this.weights, 0, this.weights.length);
+
+		for(int i = 0; i < weightContainer.values.length; i++){
+			this.weights[i] += weightContainer.values[i];
+		}
 		
 	} // end of method accumulateWeightsParallel (array)
 	
