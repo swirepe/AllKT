@@ -39,7 +39,7 @@ public class HollowKTCollection extends KTCollection{
 			this.weights[i] = 1;
 		}
 		
-		Timer.out(this, "[HollowKTCollection] Successfully created " + this.models.length + " models in ");
+		Timer.out(this, "[HollowKTCollection] Successfully created " + this.getArraySize() + " pseudo-models in ");
 	}
 	
 	

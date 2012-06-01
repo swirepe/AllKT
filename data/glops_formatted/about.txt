@@ -1,1 +1,9 @@
 glops, an assistments data set
+
+
+Feng, M., Heffernan, N., Beck, J, & Koedinger, K. (2008) Can we predict which groups of questions students will learn from? In Baker & Beck (Eds.). Proceedings of the 1st International Conference on Education Data Mining. pp.218-225. Montr¨¦al 2008
+
+
+http://web.cs.wpi.edu/~mfeng/
+
+https://docs.google.com/viewer?a=v&q=cache:Ea51RTCD4mkJ:pact.cs.cmu.edu/koedinger/pubs/Feng,%2520Heffernan%2520Beck,%2520%26%2520Koedinger_08.pdf+&hl=en&gl=us&pid=bl&srcid=ADGEESi_J5BG7dKZCRjMueP1sdpsjw79bjYKzDdDxq3X20uoXWeOHqQ4HVlmnObGzGLVFFDZV1Dg0Uau7kkelO7LRxjzWuz8-YxmxcmW3cgUaHRJ2rvngM3GjK4rplmSTLIZeEF2n4HC&sig=AHIEtbS6ehFz5X8qP0sPEZRxvqJ-NoGzgw&pli=1
