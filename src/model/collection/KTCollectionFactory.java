@@ -28,8 +28,6 @@ public class KTCollectionFactory {
 				return new PagingKTCollection(ktfact, init);
 			case HollowKTCollection:
 				return new HollowKTCollection();
-			case WeightOnlyKTCollection:
-				return new WeightOnlyKTCollection();
 			default:
 				return null;
 		}

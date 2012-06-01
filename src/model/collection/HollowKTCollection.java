@@ -298,7 +298,7 @@ public class HollowKTCollection extends KTCollection{
 			for(learn = 0; learn < 1.0; learn += step){
 				for(slip = 0; slip < 0.5; slip += step){
 					for(guess = 0; guess < (1 - slip); guess += step){
-						sb.append("" + i + initial + "," + learn + "," + guess + "," + slip + "\n");
+						sb.append("" + i + "," + initial + "," + learn + "," + guess + "," + slip + "," + this.weights[1] + "\n");
 						i += 1;
 					}
 				}
