@@ -2,6 +2,7 @@ package model.collection;
 
 import config.Constants;
 import verbose.Timer;
+import model.KTFunctions;
 import model.KTStorageless;
 import model.Response;
 
@@ -42,17 +43,17 @@ public class HollowKTCollection extends KTCollection{
 		double learn = 0.0;
 		double guess = 0.0;
 		double slip = 0.0;
-		KTStorageless m = new KTStorageless(0,0,0,0);
+
 		for(initial = 0; initial < 1.0; initial += step){
 			for(learn = 0; learn < 1.0; learn += step){
 				for(slip = 0; slip < 0.5; slip += step){
 					for(guess = 0; guess < (1 - slip); guess += step){
-						m.setParameters(initial, learn, guess, slip);
+						
 						this.weight += 1;
 						// get the forward probability for each response
 						
 						for(Response r: observations){
-							weight += m.performanceProbability(r);
+							weight += KTFunctions.performanceProbability(initial, learn, guess, slip, r);
 						}
 					}
 				}
@@ -72,13 +73,11 @@ public class HollowKTCollection extends KTCollection{
 		double learn = 0.0;
 		double guess = 0.0;
 		double slip = 0.0;
-		KTStorageless m = new KTStorageless(0,0,0,0);
 		for(initial = 0; initial < 1.0; initial += step){
 			for(learn = 0; learn < 1.0; learn += step){
 				for(slip = 0; slip < 0.5; slip += step){
 					for(guess = 0; guess < (1 - slip); guess += step){
-						m.setParameters(initial, learn, guess, slip);
-						prediction += m.predict(r);
+						prediction += KTFunctions.predict(initial, learn, guess, slip,r);
 						i += 1;
 					}
 				}

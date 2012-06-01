@@ -1,0 +1,24 @@
+<h1 id="kt-models">KT Models</h1>
+<h2 id="kt">KT</h2>
+<p>An abstract class that implements the basic functionality of knowledge tracing:</p>
+<ul>
+<li>forward probabilities</li>
+<li>predictions</li>
+<li>knowledge curves</li>
+<li>performance curves</li>
+</ul>
+<p>You set the parameters yourself; there is currently no way to learn them via expectation-maximization.</p>
+<h2 id="kthashmap">KTHashMap</h2>
+<p>A memoized version of KT, using a hashmap to store computed values.</p>
+<h2 id="ktmongo">KTMongo</h2>
+<p>A knowledge tracing model that uses a mongo database.</p>
+<p>WARNING: unimplemented.</p>
+<h2 id="ktstorageless">KTStorageless</h2>
+<p>A knowledge tracing model that doesn't do any storage.</p>
+<h1 id="kt-collections">KT Collections</h1>
+<h2 id="ktcollection">KTCollection</h2>
+<p>Stores all of the models chosen in one big array. This can be memory-intensive.</p>
+<h2 id="pagingktcollection">PagingKTCollection</h2>
+<p>Made of many KTCollections with only one in memory at a time. The rest are written to or loaded off disk as needed.</p>
+<h2 id="hollowktcollection">HollowKTCollection</h2>
+<p>Instead of making many KT models, it only stores the total accumulated weights that would be represented for each of them.</p>
