@@ -70,7 +70,7 @@ public class ConfigParser {
 			exp.setTrain(train, trainHeader, trainCompressed);
 			exp.setTest(test, testHeader, testCompressed);
 			
-			
+			exp.setSettingsFile(filename);
 		} catch(Exception e){
 			e.printStackTrace();
 		}

@@ -1,6 +1,7 @@
 package config;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import output.CompressedObjectSerializer;
@@ -17,6 +18,7 @@ import model.collection.KTCollection;
 import model.collection.KTCollectionFactory;
 import model.collection.KTCollectionType;
 import model.collection.PagingKTCollection;
+import java.util.Scanner;
 
 public class Experiment {
 	protected String id;
@@ -44,6 +46,8 @@ public class Experiment {
 	
 	protected String resultsDir;
 	protected String collectionOutFile = null;
+
+	protected String settingsFile;
 	
 	public void run(){
 		setUp();
@@ -106,6 +110,7 @@ public class Experiment {
 		}
 		
 		writeCollectionString();
+		writeSettingsFile();
 	}
 	
 	
@@ -118,6 +123,22 @@ public class Experiment {
 		wtf.write();
 	} // end of method writeCollectionString
 	
+	
+	protected void writeSettingsFile(){
+		try {
+			String expInfo = new Scanner(new File(this.settingsFile)).useDelimiter("\\Z").next();
+			
+			WriteTextFile wtf = new WriteTextFile(
+					new File(resultsDir,
+					    	 "experiment.settings"),
+			    	expInfo);
+			
+			wtf.write();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	protected void writeActualValue(){
 		double[] actual = Response.eachLast(test);
@@ -236,6 +257,11 @@ public class Experiment {
 	
 	public void setCollectionOutFile(String collectionOutFile){
 		this.collectionOutFile = collectionOutFile; 
+	}
+
+	public void setSettingsFile(String filename) {
+		this.settingsFile = filename;
+		
 	}
 	
 	
