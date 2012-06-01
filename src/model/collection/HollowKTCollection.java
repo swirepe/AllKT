@@ -78,6 +78,7 @@ public class HollowKTCollection extends KTCollection{
 	 * Accumulate the weights for each item,
 	 * parallel by observations, not my models (ie, each observation
 	 * will become its own slot in the thread pool)
+	 * WARNING: this requires a lot of memory, and is turned off by default
 	 */
 	public void accumulateWeightsParallel(Response[] observations){
 		LockingDoubleArrayContainer weightContainer = new LockingDoubleArrayContainer();
@@ -109,7 +110,7 @@ public class HollowKTCollection extends KTCollection{
 
 	@Override
 	public void train(Response[] observations){
-		this.accumulateWeightsParallel(observations);
+		this.accumulateWeights(observations);
 
 	} // end of method train
 	
