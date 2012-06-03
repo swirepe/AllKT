@@ -81,7 +81,7 @@ public class HollowKTCollection extends KTCollection{
 	 * WARNING: this requires a lot of memory, and is turned off by default
 	 */
 	public void accumulateWeightsParallel(Response[] observations){
-		LockingDoubleArrayContainer weightContainer = new LockingDoubleArrayContainer();
+		LockingDoubleArrayContainer weightContainer = new LockingDoubleArrayContainer(this.getArraySize());
 		ExecutorService svc = Executors.newFixedThreadPool(Constants.NUM_THREADS);
 		
 		int weightLength = this.getArraySize();
@@ -110,7 +110,7 @@ public class HollowKTCollection extends KTCollection{
 
 	@Override
 	public void train(Response[] observations){
-		this.accumulateWeights(observations);
+		this.accumulateWeightsParallel(observations);
 
 	} // end of method train
 	
@@ -366,18 +366,23 @@ public class HollowKTCollection extends KTCollection{
 	class LockingDoubleArrayContainer{
 		public double[] values = null;
 		
-		public synchronized void add(double[] x){
-			if(this.values == null){
-				this.values = new double[x.length];
+		public LockingDoubleArrayContainer(int length){
+			values = new double[length];
+		}
+		
+		/**
+		 * start with each value as d
+		 * @param d
+		 */
+		public void initialize(double d) {
+			for(int i = 0; i < values.length; i++){
+				values[i] = d;
 			}
-			
-			if(this.values.length != x.length){
-				System.err.println("[LockingDoubleArrayContainer] Error: array length mismatch.");
-				return;
-			}
-			
-			for(int i = 0; i < x.length; i++){
-				this.values[i] += x[i];
+		}
+
+		public void addAtIndex(double x, int index){
+			synchronized(values){
+				values[index] += x;
 			}
 		}
 		
@@ -459,12 +464,10 @@ public class HollowKTCollection extends KTCollection{
 	class WeightAccumulator implements Runnable{
 		protected LockingDoubleArrayContainer weightContainer;
 		protected Response r;
-		protected double[] weights;
 		
 		public WeightAccumulator(LockingDoubleArrayContainer weightContainer, Response r, int weightLength){
 			this.weightContainer = weightContainer;
 			this.r = r;
-			this.weights = new double[weightLength];
 		}
 		
 		public void run(){
@@ -473,20 +476,21 @@ public class HollowKTCollection extends KTCollection{
 			double learn = 0.0;
 			double guess = 0.0;
 			double slip = 0.0;
-			
+			double performance;
 			int i = 0;
 			for(initial = 0; initial < 1.0; initial += step){
 				for(learn = 0; learn < 1.0; learn += step){
 					for(slip = 0; slip < 0.5; slip += step){
 						for(guess = 0; guess < (1 - slip); guess += step){
-							weights[i] += KTFunctions.performanceProbability(initial, learn, guess, slip, r);
+							performance = KTFunctions.performanceProbability(initial, learn, guess, slip, r);
+							weightContainer.addAtIndex(performance, i);
 							i += 1;
 						}
 					}
 				}
 			}
 			
-			weightContainer.add(this.weights);
+			
 		} // end of method run
 	} // end of inner class WeightAccumulator
 } // end of class HollowKTCollection
