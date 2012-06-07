@@ -56,6 +56,7 @@ public class WriteTextFile {
 		try {
 			BufferedWriter br = new BufferedWriter(new FileWriter(outFile));
 			br.write(this.data);
+			br.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}

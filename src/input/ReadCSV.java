@@ -49,7 +49,7 @@ public class ReadCSV {
 				boolean r[] = new boolean[tokens.length];
 				
 				for(int i = 0; i < r.length; i++){
-					r[i] = Integer.parseInt(tokens[i]) == 1;
+					r[i] = Double.parseDouble(tokens[i]) == 1;
 				}
 				
 				results.add(new Response(r));
@@ -69,7 +69,7 @@ public class ReadCSV {
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		
 		return read(br);
-	} // end of overloaded method rea
+	} // end of overloaded method read
 	
 	
 	public Response[] read(String filename, boolean header){

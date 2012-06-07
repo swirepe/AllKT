@@ -494,8 +494,6 @@ public class HollowKTCollection extends KTCollection{
 					}
 				}
 			}
-			
-			
 		} // end of method run
 	} // end of inner class WeightAccumulator
 } // end of class HollowKTCollection

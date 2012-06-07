@@ -30,8 +30,8 @@ public class WriteCSV {
 			b.write(d + ",");
 		}
 		
-		fw.close();
-		//b.close();
+		//fw.close();
+		b.close();
 		
 	}
 	
