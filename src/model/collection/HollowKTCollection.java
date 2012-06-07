@@ -6,6 +6,7 @@ import model.KTFunctions;
 import model.Response;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 
 /**
@@ -365,25 +366,29 @@ public class HollowKTCollection extends KTCollection{
 	
 	class LockingDoubleArrayContainer{
 		public double[] values = null;
+		public Semaphore[] locks = null;
 		
 		public LockingDoubleArrayContainer(int length){
 			values = new double[length];
-		}
-		
-		/**
-		 * start with each value as d
-		 * @param d
-		 */
-		public void initialize(double d) {
-			for(int i = 0; i < values.length; i++){
-				values[i] = d;
+			locks = new Semaphore[length];
+			
+			// initialize each semaphore
+			for(int i = 0; i < locks.length; i++){
+				locks[i] = new Semaphore(1);
 			}
-		}
+		} // end of constructor
+		
 
 		public void addAtIndex(double x, int index){
-			synchronized(values){
-				values[index] += x;
+			try {
+				locks[index].acquire();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			values[index] += x;
+			locks[index].release();
+			
 		}
 		
 		public synchronized double[] values(){
